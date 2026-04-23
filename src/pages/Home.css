@@ -1,0 +1,504 @@
+.home-container {
+  padding: 32px 24px;
+  padding-bottom: 120px;
+  background-color: var(--bg-color);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+.main-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.main-greeting {
+  font-size: 38px;
+  font-weight: 700;
+  line-height: 1.1;
+  color: #fff;
+}
+
+.main-date {
+  font-size: 18px;
+  font-weight: 500;
+  color: #94A3B8;
+  margin-top: 12px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 16px;
+}
+
+.icon-btn {
+  color: #94A3B8;
+  transition: color 0.2s;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-btn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.mt-4 { margin-top: 16px; }
+.mt-6 { margin-top: 24px; }
+.mt-8 { margin-top: 32px; }
+.mt-10 { margin-top: 40px; }
+
+/* Grid for Plot & Hydration */
+.content-grid {
+  display: flex;
+  gap: 20px;
+  flex: 1; /* allow it to grow and fill empty space */
+  min-height: 400px;
+}
+
+.garden-plot-card {
+  flex: 1;
+  background: var(--surface-color);
+  border-radius: 20px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+}
+
+.garden-plot-card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 8px 8px;
+  pointer-events: none;
+}
+
+.plot-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  position: relative;
+  z-index: 1;
+}
+
+.plot-titles h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.plot-titles span {
+  font-size: 14px;
+  color: #94A3B8;
+  margin-top: 4px;
+  display: inline-block;
+}
+
+.weather-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 500;
+  color: #E2E8F0;
+  gap: 6px;
+}
+
+.plants-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  flex: 1;
+  gap: 20px;
+  position: relative;
+  z-index: 1;
+  margin-top: auto; /* push down slightly based on content */
+  padding-top: 24px;
+}
+
+.plant-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.plant-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #CBD5E1;
+  margin-top: 12px;
+}
+
+.empty-cell {
+  opacity: 0.6;
+}
+
+.soil-plot {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px dashed rgba(148, 163, 184, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+/* Custom Plant Animations */
+.plant-avatar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 80px;
+}
+
+/* Tree / Protein */
+@keyframes dropSingle {
+  0% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(45px); opacity: 0; }
+}
+.is-new .apple-single { 
+  animation: dropSingle 0.4s cubic-bezier(0.5, 0, 1, 1) forwards; 
+  animation-delay: 0.4s; 
+}
+
+.muscular-arm {
+  opacity: 0;
+}
+
+@keyframes armSlideIn {
+  0% { transform: translateX(-40px) scaleX(0.5); opacity: 0; }
+  10% { transform: translateX(0) scaleX(1); opacity: 1; }
+  30% { transform: translateX(0) scaleX(1); opacity: 1; }
+  40% { transform: translateX(-40px) scaleX(0.5); opacity: 0; }
+  100% { transform: translateX(-40px) scaleX(0.5); opacity: 0; }
+}
+.is-new .muscular-arm { 
+  animation: armSlideIn 3.5s linear forwards; 
+  animation-delay: 1.0s; 
+  transform-origin: left center;
+  opacity: 0;
+}
+
+@keyframes treeShake {
+  0% { transform: rotate(0deg); }
+  5%, 15%, 25% { transform: rotate(-8deg); }
+  10%, 20%, 30% { transform: rotate(10deg); }
+  35% { transform: rotate(0deg); }
+  100% { transform: rotate(0deg); }
+}
+.is-new .tree-group { 
+  animation: treeShake 3.5s linear forwards; 
+  animation-delay: 1.3s; 
+  transform-origin: 50% 90%; 
+}
+
+@keyframes dropAll {
+  0% { transform: translateY(0); opacity: 1; }
+  10% { transform: translateY(45px); opacity: 0; }
+  100% { transform: translateY(45px); opacity: 0; }
+}
+.is-new .apple-all { 
+  animation: dropAll 3.5s cubic-bezier(0.5, 0, 1, 1) forwards; 
+  animation-delay: 1.5s; 
+}
+
+/* Wheat / Carbs */
+@keyframes swayWind {
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(15deg); }
+  50% { transform: rotate(-10deg); }
+  75% { transform: rotate(8deg); }
+  100% { transform: rotate(0deg); }
+}
+.type-carbs.is-new .wheat-svg {
+  animation: swayWind 2.5s ease-in-out forwards;
+  transform-origin: 50% 90%;
+}
+
+/* Mushroom / Sugars */
+@keyframes glowBurst {
+  0% { filter: drop-shadow(0 0 0px rgba(168,85,247,0)); transform: scale(1); }
+  50% { filter: drop-shadow(0 0 20px rgba(168,85,247,1)); transform: scale(1.1); }
+  100% { filter: drop-shadow(0 0 5px rgba(168,85,247,0.5)); transform: scale(1); }
+}
+.type-sugars.is-new .mushroom-svg {
+  animation: glowBurst 2s ease-out forwards;
+}
+
+/* Succulent / Fats */
+@keyframes bloomSpin {
+  0% { transform: scale(0) rotate(-180deg); opacity: 0;}
+  50% { transform: scale(1.2) rotate(20deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+.type-fats.is-new .succulent-svg {
+  animation: bloomSpin 1.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+/* Specific SVG colors */
+.macro-svg { margin: 0 auto; filter: drop-shadow(0px 8px 10px rgba(0,0,0,0.3)); }
+.protein-svg { color: #86EFAC; fill: rgba(134,239,172,0.2); }
+.sugars-svg { color: #FCA5A5; fill: rgba(252,165,165,0.2); }
+.fats-svg { color: #99F6E4; fill: rgba(153,246,228,0.2); }
+.carbs-svg { color: #FEF08A; fill: rgba(254,240,138,0.2); }
+
+
+/* Vertical Hydration Bar */
+.hydration-vertical {
+  width: 72px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hydro-icon-wrap {
+  width: 56px;
+  height: 56px;
+  background-color: var(--surface-highlight);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+.hydro-bar-wrapper {
+  flex: 1;
+  width: 48px;
+  margin: 16px 0;
+  padding: 6px;
+  background-color: var(--surface-highlight);
+  border-radius: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+.hydro-track {
+  width: 100%;
+  height: 100%;
+  border-radius: 18px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hydro-fill {
+  width: 100%;
+  background-color: #E2E8F0;
+  border-radius: 18px;
+  position: absolute;
+  bottom: 0;
+  transition: height 0.5s ease;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.hydro-text-rotate {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-size: 14px;
+  font-weight: 600;
+  color: #334155;
+  padding: 24px 0;
+  white-space: nowrap;
+}
+
+
+/* Bottom Stats Cards */
+.stats-cards-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.s-card {
+  background-color: var(--surface-color);
+  border-radius: 16px;
+  padding: 20px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border: 1px solid rgba(255,255,255,0.05);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+}
+
+.s-text {
+  font-size: 15px;
+  color: #94A3B8;
+  line-height: 1.5;
+}
+
+.s-text strong {
+  font-size: 18px;
+  color: #fff;
+  display: inline-block;
+  margin-top: 4px;
+}
+
+
+/* Floating Component Layout */
+.fab-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.fab-log {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: linear-gradient(135deg, var(--surface-highlight), #1F1F22);
+  padding: 8px 32px 8px 8px;
+  border-radius: 50px;
+  box-shadow: 0 10px 30px rgba(134, 239, 172, 0.15);
+  transition: transform 0.2s, box-shadow 0.2s;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.fab-log:active {
+  transform: scale(0.95);
+}
+
+.fab-log:hover {
+  box-shadow: 0 12px 35px rgba(134, 239, 172, 0.25);
+}
+
+.fab-circle {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background-color: var(--surface-highlight);
+  border: 1px solid #71717A;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fab-label {
+  font-size: 18px;
+  font-weight: 600;
+  color: #F8FAFC;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.modal-content {
+  background-color: var(--surface-color);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 400px;
+  border: 1px solid rgba(255,255,255,0.1);
+  overflow: hidden;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.modal-header h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.close-btn {
+  color: #94A3B8;
+  font-size: 20px;
+  font-weight: bold;
+  background: none;
+  border: none;
+  transition: color 0.2s;
+  padding: 4px;
+}
+
+.close-btn:hover {
+  color: #fff;
+}
+
+.modal-body {
+  padding: 24px;
+}
+
+.settings-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.setting-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #E2E8F0;
+  font-size: 16px;
+}
+
+.setting-val {
+  color: #94A3B8;
+  font-weight: 500;
+}
+
+.notif-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.notif-item {
+  background: rgba(255,255,255,0.02);
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+}
+
+.notif-item.unread {
+  border-color: rgba(134, 239, 172, 0.3);
+  background: rgba(134, 239, 172, 0.05);
+}
+
+.notif-time {
+  font-size: 11px;
+  color: #94A3B8;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.notif-item p {
+  color: #E2E8F0;
+  font-size: 14px;
+  line-height: 1.4;
+}

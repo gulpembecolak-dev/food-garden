@@ -1,0 +1,501 @@
+.insights-container {
+  padding: var(--spacing-lg);
+  padding-bottom: 120px;
+  background-color: var(--bg-color); /* Darker background resembling figma screenshot */
+  min-height: 100vh;
+}
+
+.journal-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: var(--spacing-md);
+}
+
+.tabs-scroll-container {
+  margin: 0 -24px;
+  padding: 0 24px;
+  overflow-x: auto;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.tabs-scroll-container::-webkit-scrollbar {
+  display: none;
+}
+
+.tabs-wrapper {
+  display: flex;
+  gap: 24px;
+}
+
+.journal-tab {
+  color: #94A3B8;
+  padding: 8px 0;
+  font-size: 16px;
+  position: relative;
+  white-space: nowrap;
+}
+
+.journal-tab.active {
+  color: #4ADE80;
+  font-weight: 500;
+}
+
+.journal-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: #4ADE80;
+  border-radius: 2px 2px 0 0;
+}
+
+.mt-6 { margin-top: 24px; }
+.mt-8 { margin-top: 32px; }
+.mb-4 { margin-bottom: 16px; }
+.mb-2 { margin-bottom: 8px; }
+.mt-4 { margin-top: 16px; }
+.mt-2 { margin-top: 8px; }
+
+/* Horizontal Scrolling Cards */
+.cards-horizontal-scroll {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  margin: 0 -24px;
+  padding: 0 24px 10px;
+}
+
+.cards-horizontal-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.journal-card {
+  min-width: 200px;
+  max-width: 220px;
+  flex-shrink: 0;
+  background-color: var(--surface-color);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-heading {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.card-footer-text {
+  margin-top: auto;
+  padding-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.card-footer-text strong {
+  font-size: 13px;
+  color: #fff;
+  font-weight: 600;
+}
+
+.card-footer-text span {
+  font-size: 11px;
+  color: #94A3B8;
+}
+
+.center-text { text-align: center; }
+
+/* Donut Chart */
+.donut-chart-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  height: 120px;
+}
+
+.donut-wrapper {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: conic-gradient(
+    #60A5FA 0% 25%,   /* Protein (Blue) */
+    #34D399 25% 65%,  /* Carbs (Greenish) */
+    #F87171 65% 75%,  /* Sugars (Red) */
+    #FBBF24 75% 100%  /* Fats (Yellow) */
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.donut-hole {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background-color: var(--surface-color);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.donut-score-label {
+  font-size: 10px;
+  color: #94A3B8;
+}
+
+.donut-score-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: #4ADE80;
+}
+
+.donut-labels span {
+  position: absolute;
+  font-size: 10px;
+  color: #94A3B8;
+}
+
+.dl-top-left { top: -10px; left: -25px; }
+.dl-top-right { top: 10px; right: -25px; }
+.dl-bottom-left { bottom: 0; left: -20px; }
+.dl-bottom-right { bottom: -10px; right: -25px; }
+
+
+/* Hydration SVG chart */
+.trend-chart-area {
+  position: relative;
+  flex: 1;
+}
+
+.hydration-svg {
+  width: 100%;
+  height: 80px;
+  display: block;
+}
+
+.days-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: #94A3B8;
+  margin-top: 4px;
+}
+
+/* Mood table */
+.mood-table {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mt-headers {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: #94A3B8;
+  padding-left: 10px;
+}
+
+.mt-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 10px;
+}
+
+.energy-circle {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.energy-circle.up { background-color: #FBBF24; color: #78350F; }
+.energy-circle.down { background-color: #F87171; color: #7F1D1D; }
+
+/* Sub headings */
+.section-heading {
+  font-size: 18px;
+  font-weight: 600;
+  color: #fff;
+}
+
+/* Pattern Grid */
+.pattern-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+@media (max-width: 400px) {
+  .pattern-grid { grid-template-columns: 1fr; }
+}
+
+.p-card {
+  background-color: var(--surface-color);
+  border-radius: 12px;
+  padding: 16px;
+  border: none;
+}
+
+.meal-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.meal-list li {
+  font-size: 14px;
+  color: #E2E8F0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Bar Chart inside P Card */
+.bar-chart-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bar-label {
+  font-size: 12px;
+  color: #94A3B8;
+  width: 60px;
+}
+
+.bar-track {
+  flex: 1;
+  height: 20px;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 4px;
+}
+
+.bar-pct {
+  font-size: 12px;
+  color: #E2E8F0;
+  width: 25px;
+  text-align: right;
+}
+
+/* Scatter area */
+.scatter-plot-area {
+  display: flex;
+  height: 120px;
+  position: relative;
+  padding-bottom: 24px;
+}
+
+.scatter-y-axis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  color: #94A3B8;
+  padding-right: 8px;
+  position: relative;
+  border-right: 1px solid rgba(255,255,255,0.1);
+}
+
+.axis-label-y {
+  position: absolute;
+  left: -40px;
+  top: 50%;
+  transform: rotate(-90deg) translateX(50%);
+  transform-origin: center right;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.scatter-graph {
+  flex: 1;
+  position: relative;
+}
+
+.scatter-midline {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  border-top: 1px dashed rgba(255,255,255,0.2);
+}
+
+.s-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  position: absolute;
+  transform: translate(-50%, -50%);
+}
+
+.s-dot.relative {
+  position: relative;
+  transform: none;
+  display: inline-block;
+  margin-right: 6px;
+}
+
+.s-dot.error { background-color: #F87171; }
+.s-dot.success { background-color: #4ADE80; }
+.s-dot.warning { background-color: #FBBF24; }
+.s-dot.neutral { background-color: #94A3B8; }
+
+.scatter-legend {
+  position: absolute;
+  right: 0;
+  top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: rgba(30,30,36,0.8);
+  padding: 4px;
+  border-radius: 4px;
+  font-size: 10px;
+  color: #E2E8F0;
+}
+
+.sl-item {
+  display: flex;
+  align-items: center;
+}
+
+.time-label {
+  font-size: 11px;
+  color: #94A3B8;
+  margin-top: 8px;
+}
+
+/* Garden Health */
+.garden-health-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.gh-days {
+  display: flex;
+  gap: 8px;
+}
+
+.gh-col {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+}
+
+.gh-lbl {
+  font-size: 11px;
+  color: #94A3B8;
+}
+
+.gh-box {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+}
+
+.gh-box.green-dark { background-color: #15803D; }
+.gh-box.green-light { background-color: #4ADE80; }
+.gh-box.yellow { background-color: #FDE047; }
+.gh-box.red { background-color: #EF4444; }
+
+.gh-legend {
+  display: flex;
+  flex-direction: column;
+  font-size: 11px;
+  color: #CBD5E1;
+}
+
+.dot-sm {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+.dot-sm.green-dark { background-color: #15803D; }
+.dot-sm.yellow { background-color: #FDE047; }
+.dot-sm.red { background-color: #EF4444; }
+
+.text-xs { font-size: 10px; }
+.text-secondary { color: #94A3B8; }
+
+/* Reflection Box */
+.reflection-box {
+  display: flex;
+  flex-direction: column;
+}
+
+.reflection-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.reflection-desc {
+  font-size: 13px;
+  color: #94A3B8;
+  margin-bottom: 12px;
+  margin-top: 4px;
+}
+
+.reflection-input {
+  background-color: var(--surface-highlight);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px;
+  padding: 12px 16px;
+  color: #fff;
+  font-family: inherit;
+  font-size: 14px;
+  resize: none;
+  min-height: 50px;
+}
+
+.reflection-input::placeholder {
+  color: #64748B;
+}
+
+.outline-btn {
+  background-color: transparent;
+  border: 1px solid #4ADE80;
+  color: #4ADE80;
+  font-weight: 600;
+  margin-top: 16px;
+}
+
+.outline-btn:hover {
+  background-color: rgba(74, 222, 128, 0.1);
+}
