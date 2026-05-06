@@ -73,6 +73,7 @@ export default function LogMeal({ onAddMeal }) {
         },
         mood,
         location,
+        loggedAt: new Date().toISOString(),
         isNew: true,
       });
     }

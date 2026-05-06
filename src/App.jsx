@@ -4,6 +4,7 @@ import Home from './pages/Home';
 import LogMeal from './pages/LogMeal';
 import Insights from './pages/Insights';
 import Profile from './pages/Profile';
+import Calendar from './pages/Calendar';
 import BottomNav from './components/BottomNav';
 import SideNav from './components/SideNav';
 import Onboarding from './components/Onboarding';
@@ -21,6 +22,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Home meals={meals} />} />
             <Route path="/log" element={<LogMeal onAddMeal={(meal) => setMeals([...meals, meal])} />} />
+            <Route path="/calendar" element={<Calendar meals={meals} />} />
             <Route path="/insights" element={<Insights meals={meals} />} />
             <Route path="/profile" element={<Profile onShowIntro={() => setShowOnboarding(true)} />} />
           </Routes>

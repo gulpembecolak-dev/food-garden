@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { Home, Calendar, LayoutDashboard, User, Sprout } from 'lucide-react';
+import { Home, Calendar as CalendarIcon, LayoutDashboard, User, Sprout } from 'lucide-react';
 import { useUser } from '../context/UserContext';
 import './SideNav.css';
 
@@ -34,8 +34,8 @@ export default function SideNav() {
         <NavLink to="/" end className={({ isActive }) => `side-link ${isActive ? 'active' : ''}`}>
           <Home size={20} /><span>Home</span>
         </NavLink>
-        <NavLink to="/log" className={({ isActive }) => `side-link ${isActive ? 'active' : ''}`}>
-          <Calendar size={20} /><span>Log meal</span>
+        <NavLink to="/calendar" className={({ isActive }) => `side-link ${isActive ? 'active' : ''}`}>
+          <CalendarIcon size={20} /><span>Calendar</span>
         </NavLink>
         <NavLink to="/insights" className={({ isActive }) => `side-link ${isActive ? 'active' : ''}`}>
           <LayoutDashboard size={20} /><span>Insights</span>
