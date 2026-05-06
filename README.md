@@ -2,7 +2,7 @@
 
 An interactive web app where personal health data is presented and contextualized for two example users (Walter & Ann). Built for the *Visual Communication 2 — Health App* assignment.
 
-**Live demo:** _add Netlify URL after first deploy_
+**Live demo:** https://foodgardenn.netlify.app/
 
 ## Stack
 
