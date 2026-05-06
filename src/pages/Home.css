@@ -7,6 +7,30 @@
   flex-direction: column;
 }
 
+@media (min-width: 1024px) {
+  .home-container {
+    padding: 40px 0;
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    grid-template-areas:
+      "header header"
+      "main side"
+      "stats stats"
+      "fab fab";
+    gap: 28px;
+    min-height: auto;
+  }
+  .home-container > .main-header { grid-area: header; }
+  .home-container > .content-grid { grid-area: main; min-height: 460px; margin-top: 0 !important; }
+  .home-container > .stats-cards-row { grid-area: stats; margin-top: 0 !important; }
+  .home-container > .fab-container { grid-area: fab; margin-top: 0 !important; }
+  .home-container > .desktop-side { grid-area: side; display: flex; }
+  .home-container > .recommendation-slot {
+    grid-column: 1 / -1;
+    margin-top: 0 !important;
+  }
+}
+
 /* Header */
 .main-header {
   display: flex;
@@ -15,29 +39,32 @@
 }
 
 .main-greeting {
-  font-size: 38px;
+  font-size: 32px;
   font-weight: 700;
-  line-height: 1.1;
-  color: #fff;
+  line-height: 1.15;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
 }
 
 .main-date {
-  font-size: 18px;
+  font-size: 14px;
   font-weight: 500;
-  color: #94A3B8;
-  margin-top: 12px;
+  color: var(--text-secondary);
+  margin-top: 8px;
 }
 
 .header-actions {
   display: flex;
-  gap: 16px;
+  gap: 10px;
 }
 
 .icon-btn {
-  color: #94A3B8;
-  transition: color 0.2s;
-  padding: 8px;
-  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-secondary);
+  transition: color 0.15s, background 0.15s;
+  width: 38px;
+  height: 38px;
+  background: var(--surface-color);
+  border: 1px solid rgba(255,255,255,0.05);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -45,8 +72,8 @@
 }
 
 .icon-btn:hover {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  background: var(--surface-highlight);
 }
 
 .mt-4 { margin-top: 16px; }
@@ -65,22 +92,21 @@
 .garden-plot-card {
   flex: 1;
   background: var(--surface-color);
-  border-radius: 20px;
-  padding: 24px;
+  border-radius: 18px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
   position: relative;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow: 0 10px 40px rgba(0,0,0,0.3);
 }
 
 .garden-plot-card::after {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
-  background-image: radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px);
-  background-size: 8px 8px;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 10px 10px;
   pointer-events: none;
 }
 
@@ -93,26 +119,31 @@
 }
 
 .plot-titles h2 {
-  font-size: 24px;
-  font-weight: 700;
-  color: #fff;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
 .plot-titles span {
-  font-size: 14px;
-  color: #94A3B8;
-  margin-top: 4px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 2px;
   display: inline-block;
 }
 
 .weather-icon {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  font-size: 14px;
-  font-weight: 500;
-  color: #E2E8F0;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
   gap: 6px;
+  background: var(--surface-highlight);
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.04);
 }
 
 .plants-grid {
@@ -135,26 +166,32 @@
 }
 
 .plant-label {
-  font-size: 14px;
-  font-weight: 500;
-  color: #CBD5E1;
-  margin-top: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: 10px;
 }
 
-.empty-cell {
-  opacity: 0.6;
+.empty-cell { opacity: 0.55; }
+.empty-cell-num {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  opacity: 0.5;
 }
 
 .soil-plot {
-  width: 48px;
-  height: 48px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
-  border: 2px dashed rgba(148, 163, 184, 0.4);
+  border: 1.5px dashed rgba(148, 163, 184, 0.25);
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto;
-  background-color: rgba(255, 255, 255, 0.02);
+  background-color: rgba(255, 255, 255, 0.015);
 }
 
 /* Custom Plant Animations */
@@ -259,7 +296,7 @@
 
 /* Vertical Hydration Bar */
 .hydration-vertical {
-  width: 72px;
+  width: 68px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -267,23 +304,29 @@
 }
 
 .hydro-icon-wrap {
-  width: 56px;
-  height: 56px;
-  background-color: var(--surface-highlight);
+  width: 44px;
+  height: 44px;
+  background-color: var(--surface-color);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   border: 1px solid rgba(255,255,255,0.05);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.hydro-icon-wrap:hover {
+  background-color: var(--surface-highlight);
+  border-color: rgba(96, 165, 250, 0.3);
 }
 
 .hydro-bar-wrapper {
   flex: 1;
-  width: 48px;
-  margin: 16px 0;
-  padding: 6px;
-  background-color: var(--surface-highlight);
-  border-radius: 24px;
+  width: 44px;
+  margin: 14px 0;
+  padding: 5px;
+  background-color: var(--surface-color);
+  border-radius: 22px;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -293,31 +336,34 @@
 .hydro-track {
   width: 100%;
   height: 100%;
-  border-radius: 18px;
+  border-radius: 17px;
   position: relative;
   overflow: hidden;
+  background: rgba(96, 165, 250, 0.05);
 }
 
 .hydro-fill {
   width: 100%;
-  background-color: #E2E8F0;
-  border-radius: 18px;
+  background: linear-gradient(180deg, #60A5FA 0%, #3B82F6 100%);
+  border-radius: 16px;
   position: absolute;
   bottom: 0;
   transition: height 0.5s ease;
   display: flex;
   align-items: flex-end;
   justify-content: center;
+  box-shadow: 0 -2px 10px rgba(59, 130, 246, 0.3) inset;
 }
 
 .hydro-text-rotate {
   writing-mode: vertical-rl;
   transform: rotate(180deg);
-  font-size: 14px;
+  font-size: 11px;
   font-weight: 600;
-  color: #334155;
-  padding: 24px 0;
+  color: var(--text-primary);
+  padding: 18px 0;
   white-space: nowrap;
+  letter-spacing: 0.04em;
 }
 
 
@@ -325,33 +371,71 @@
 .stats-cards-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
+  gap: 12px;
+}
+
+@media (max-width: 380px) {
+  .stats-cards-row { gap: 8px; }
+  .s-card { padding: 12px; gap: 6px; }
+  .s-card-val strong { font-size: 18px; }
+  .s-card-head { letter-spacing: 0.04em; font-size: 10px; }
 }
 
 .s-card {
   background-color: var(--surface-color);
   border-radius: 16px;
-  padding: 20px 12px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
+  gap: 8px;
   border: 1px solid rgba(255,255,255,0.05);
   box-shadow: 0 4px 15px rgba(0,0,0,0.15);
 }
 
-.s-text {
-  font-size: 15px;
-  color: #94A3B8;
-  line-height: 1.5;
+.s-card-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
 }
 
-.s-text strong {
-  font-size: 18px;
-  color: #fff;
-  display: inline-block;
-  margin-top: 4px;
+.s-card-val {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.s-card-val strong {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.s-target {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.s-card-sub {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.s-progress {
+  height: 4px;
+  background: var(--surface-highlight);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.s-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.4s ease;
 }
 
 
@@ -365,38 +449,37 @@
 .fab-log {
   display: flex;
   align-items: center;
-  gap: 20px;
-  background: linear-gradient(135deg, var(--surface-highlight), #1F1F22);
-  padding: 8px 32px 8px 8px;
-  border-radius: 50px;
-  box-shadow: 0 10px 30px rgba(134, 239, 172, 0.15);
-  transition: transform 0.2s, box-shadow 0.2s;
-  border: 1px solid rgba(255,255,255,0.1);
-}
-
-.fab-log:active {
-  transform: scale(0.95);
+  gap: 16px;
+  background: var(--surface-color);
+  padding: 6px 24px 6px 6px;
+  border-radius: 999px;
+  transition: transform 0.15s ease, border-color 0.2s, box-shadow 0.2s;
+  border: 1px solid rgba(255,255,255,0.06);
 }
 
 .fab-log:hover {
-  box-shadow: 0 12px 35px rgba(134, 239, 172, 0.25);
+  border-color: rgba(16, 185, 129, 0.4);
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.15);
 }
 
+.fab-log:active { transform: scale(0.97); }
+
 .fab-circle {
-  width: 72px;
-  height: 72px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
-  background-color: var(--surface-highlight);
-  border: 1px solid #71717A;
+  background: var(--primary-color);
   display: flex;
   align-items: center;
   justify-content: center;
+  color: #062a1f;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
 }
 
 .fab-label {
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 600;
-  color: #F8FAFC;
+  color: var(--text-primary);
 }
 
 /* Modal Styles */
@@ -432,11 +515,11 @@
 .modal-header h3 {
   font-size: 20px;
   font-weight: 600;
-  color: #fff;
+  color: var(--text-primary);
 }
 
 .close-btn {
-  color: #94A3B8;
+  color: var(--text-secondary);
   font-size: 20px;
   font-weight: bold;
   background: none;
@@ -446,7 +529,7 @@
 }
 
 .close-btn:hover {
-  color: #fff;
+  color: var(--text-primary);
 }
 
 .modal-body {
@@ -463,12 +546,12 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  color: #E2E8F0;
+  color: var(--text-primary);
   font-size: 16px;
 }
 
 .setting-val {
-  color: #94A3B8;
+  color: var(--text-secondary);
   font-weight: 500;
 }
 
@@ -492,13 +575,13 @@
 
 .notif-time {
   font-size: 11px;
-  color: #94A3B8;
+  color: var(--text-secondary);
   display: block;
   margin-bottom: 4px;
 }
 
 .notif-item p {
-  color: #E2E8F0;
+  color: var(--text-primary);
   font-size: 14px;
   line-height: 1.4;
 }

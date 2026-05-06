@@ -1,0 +1,13 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# HashRouter handles routing client-side, but include this fallback so
+# any direct hit on a non-root path still serves the SPA shell.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

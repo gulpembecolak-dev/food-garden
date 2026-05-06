@@ -5,29 +5,29 @@ import LogMeal from './pages/LogMeal';
 import Insights from './pages/Insights';
 import Profile from './pages/Profile';
 import BottomNav from './components/BottomNav';
+import SideNav from './components/SideNav';
+import Onboarding from './components/Onboarding';
+import { shouldShowOnboarding } from './components/onboardingState';
 
 function App() {
   const [meals, setMeals] = useState([]);
+  const [showOnboarding, setShowOnboarding] = useState(shouldShowOnboarding);
 
   return (
-    <div className="app-container" style={{ 
-      display: 'flex', 
-      flexDirection: 'column', 
-      height: '100vh', 
-      maxWidth: '480px', 
-      margin: '0 auto', 
-      position: 'relative',
-      overflow: 'hidden'
-    }}>
-      <div className="content" style={{ flex: 1, overflowY: 'auto', paddingBottom: '80px' }}>
-        <Routes>
-          <Route path="/" element={<Home meals={meals} />} />
-          <Route path="/log" element={<LogMeal onAddMeal={(meal) => setMeals([...meals, meal])} />} />
-          <Route path="/insights" element={<Insights />} />
-          <Route path="/profile" element={<Profile />} />
-        </Routes>
+    <div className="app-shell">
+      <SideNav />
+      <div className="app-main">
+        <div className="app-content">
+          <Routes>
+            <Route path="/" element={<Home meals={meals} />} />
+            <Route path="/log" element={<LogMeal onAddMeal={(meal) => setMeals([...meals, meal])} />} />
+            <Route path="/insights" element={<Insights meals={meals} />} />
+            <Route path="/profile" element={<Profile onShowIntro={() => setShowOnboarding(true)} />} />
+          </Routes>
+        </div>
+        <BottomNav />
       </div>
-      <BottomNav />
+      {showOnboarding && <Onboarding onComplete={() => setShowOnboarding(false)} />}
     </div>
   );
 }

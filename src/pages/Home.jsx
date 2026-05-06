@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Settings, Bell, Sun, Droplet, Plus, Utensils, BicepsFlexed, Smile } from 'lucide-react';
+import { Settings, Bell, Sun, Droplet, Plus, Utensils, Flame, Smile } from 'lucide-react';
 import './Home.css';
+import { useUser } from '../context/UserContext';
+import Recommendation from '../components/Recommendation';
 
 import { TreePlant, MushroomPlant, WheatPlant, SucculentPlant } from '../components/Plants';
 
 export default function Home({ meals = [] }) {
   const navigate = useNavigate();
+  const { user } = useUser();
   const [hydration, setHydration] = useState(60);
   const [modalType, setModalType] = useState(null); // 'settings' | 'notifications' | null
   const [, setForceRender] = useState(0);
@@ -35,22 +38,12 @@ export default function Home({ meals = [] }) {
     setHydration(prev => Math.max(prev - 10, 0));
   };
 
-  // Stats Calculations
-  let topMacro = 'Protein';
-  if (meals.length > 0) {
-    const sums = meals.reduce((acc, m) => {
-      if (m.macros) {
-         acc.protein += m.macros.protein || 0;
-         acc.carbs += m.macros.carbs || 0;
-         acc.fats += m.macros.fats || 0;
-      }
-      return acc;
-    }, { protein: 0, carbs: 0, fats: 0 });
-    const max = Math.max(sums.protein, sums.carbs, sums.fats);
-    if (max === sums.carbs) topMacro = 'Carbs';
-    else if (max === sums.fats) topMacro = 'Fats';
-    else if (max === 0 && meals.some(m => m.type === 'snack')) topMacro = 'Sugars';
-  }
+  const consumedCalories = meals.reduce((sum, m) => sum + (m.macros?.calories ?? 0) * 10, 0);
+  const consumedProtein = meals.reduce((sum, m) => sum + (m.macros?.protein ?? 0), 0);
+  const calPct = Math.min(100, Math.round((consumedCalories / user.targets.calories) * 100));
+  const protPct = Math.min(100, Math.round((consumedProtein / user.targets.protein) * 100));
+
+  const hydrationLiters = ((hydration / 100) * user.targets.hydrationL).toFixed(1);
 
   let topMood = 'None Yet';
   if (meals.length > 0) {
@@ -71,12 +64,12 @@ export default function Home({ meals = [] }) {
       {/* Header */}
       <header className="main-header">
         <div className="header-text">
-          <h1 className="main-greeting">Good Morning,<br/>Alex</h1>
-          <p className="main-date">Friday, March 13</p>
+          <h1 className="main-greeting">Good morning,<br/>{user.name}</h1>
+          <p className="main-date">Friday, March 13 · {user.targets.calories} kcal target</p>
         </div>
         <div className="header-actions">
-          <button className="icon-btn" onClick={() => setModalType('settings')}><Settings size={28} /></button>
-          <button className="icon-btn" onClick={() => setModalType('notifications')}><Bell size={28} /></button>
+          <button className="icon-btn" aria-label="Settings" onClick={() => setModalType('settings')}><Settings size={24} /></button>
+          <button className="icon-btn" aria-label="Notifications" onClick={() => setModalType('notifications')}><Bell size={24} /></button>
         </div>
       </header>
 
@@ -87,12 +80,12 @@ export default function Home({ meals = [] }) {
         <div className="garden-plot-card">
           <div className="plot-header">
             <div className="plot-titles">
-              <h2>Garden Plot</h2>
-              <span>Soil & hydration status</span>
+              <h2>Garden plot</h2>
+              <span>{meals.length} of 4 plots planted</span>
             </div>
             <div className="weather-icon">
-              <Sun size={32} color="#FBBF24" />
-              <span>Sun</span>
+              <Sun size={14} color="#FBBF24" />
+              <span>Sunny</span>
             </div>
           </div>
 
@@ -117,9 +110,9 @@ export default function Home({ meals = [] }) {
             {Array.from({length: Math.max(0, 4 - meals.length)}).map((_, idx) => (
               <div key={`empty-${idx}`} className="plant-cell empty-cell">
                 <div className="soil-plot">
-                   <span style={{opacity: 0.3, fontSize: '12px', marginTop: '6px', color: '#94A3B8'}}>{idx + meals.length + 1}</span>
+                   <span className="empty-cell-num">{idx + meals.length + 1}</span>
                 </div>
-                <span className="plant-label" style={{opacity: 0.5}}>Empty Soil</span>
+                <span className="plant-label">Empty soil</span>
               </div>
             ))}
           </div>
@@ -127,20 +120,20 @@ export default function Home({ meals = [] }) {
 
         {/* Right: Vertical Hydration */}
         <div className="hydration-vertical">
-          <button className="hydro-icon-wrap" onClick={addHydration} style={{ cursor: 'pointer', border: 'none' }}>
-            <Droplet size={24} fill="#94A3B8" color="#94A3B8"/>
+          <button className="hydro-icon-wrap" onClick={addHydration} aria-label="Add 250 ml">
+            <Droplet size={18} fill="#60A5FA" color="#60A5FA"/>
           </button>
-          
+
           <div className="hydro-bar-wrapper">
-             <div className="hydro-track">
+             <div className="hydro-track" role="progressbar" aria-valuenow={hydration} aria-valuemin="0" aria-valuemax="100" aria-label="Hydration">
                 <div className="hydro-fill" style={{ height: `${hydration}%` }}>
-                   <span className="hydro-text-rotate">Hydration Level: {hydration}%</span>
+                   <span className="hydro-text-rotate">{hydrationLiters} / {user.targets.hydrationL} L</span>
                 </div>
              </div>
           </div>
 
-          <button className="hydro-icon-wrap" onClick={removeHydration} style={{ cursor: 'pointer', border: 'none' }}>
-            <Droplet size={24} strokeWidth={2.5} color="#94A3B8"/>
+          <button className="hydro-icon-wrap" onClick={removeHydration} aria-label="Remove 250 ml">
+            <Droplet size={18} strokeWidth={2.5} color="var(--text-secondary)"/>
           </button>
         </div>
       </div>
@@ -148,28 +141,38 @@ export default function Home({ meals = [] }) {
       {/* Stats Cards Row */}
       <div className="stats-cards-row mt-8">
         <div className="s-card">
-          <Utensils size={36} color="#94A3B8" />
-          <div className="s-text mt-4">Meals:<br/><strong>{meals.length}</strong></div>
+          <div className="s-card-head"><Flame size={20} color="#FBBF24" /><span>Calories</span></div>
+          <div className="s-card-val"><strong>{consumedCalories}</strong><span className="s-target">/ {user.targets.calories}</span></div>
+          <div className="s-progress"><div className="s-progress-fill" style={{ width: `${calPct}%`, background: '#FBBF24' }} /></div>
         </div>
         <div className="s-card">
-          <BicepsFlexed size={36} color="#4ADE80" />
-          <div className="s-text mt-4">
-            Top Macro:<br/><strong style={{color: topMacro === 'Carbs' ? '#FBBF24' : topMacro === 'Fats' ? '#14B8A6' : topMacro === 'Sugars' ? '#A855F7' : '#4ADE80'}}>{topMacro}</strong>
-          </div>
+          <div className="s-card-head"><Utensils size={20} color="#3B82F6" /><span>Protein</span></div>
+          <div className="s-card-val"><strong>{consumedProtein}g</strong><span className="s-target">/ {user.targets.protein}g</span></div>
+          <div className="s-progress"><div className="s-progress-fill" style={{ width: `${protPct}%`, background: '#3B82F6' }} /></div>
         </div>
         <div className="s-card">
-          <Smile size={36} color="#FBBF24" />
-          <div className="s-text mt-4">
-            Mood:<br/><strong style={{color:"#FBBF24"}}>{topMood}</strong>
-          </div>
+          <div className="s-card-head"><Smile size={20} color="#A855F7" /><span>Mood</span></div>
+          <div className="s-card-val"><strong style={{ fontSize: '18px' }}>{topMood}</strong></div>
+          <div className="s-card-sub">{meals.length} meal{meals.length === 1 ? '' : 's'} logged</div>
         </div>
+      </div>
+
+      {/* Personalized recommendation */}
+      <div className="recommendation-slot mt-8">
+        <Recommendation
+          user={user}
+          consumedCalories={consumedCalories}
+          consumedProtein={consumedProtein}
+          hydrationPct={hydration}
+          onAction={() => navigate('/log')}
+        />
       </div>
 
       {/* Floating Action Button */}
       <div className="fab-container mt-10">
         <button className="fab-log" onClick={() => navigate('/log')}>
           <div className="fab-circle">
-            <Plus size={36} color="#E2E8F0" />
+            <Plus size={28} strokeWidth={2.5} />
           </div>
           <span className="fab-label">Log Meal</span>
         </button>

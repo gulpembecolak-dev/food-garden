@@ -1,0 +1,105 @@
+.side-nav {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .side-nav {
+    display: flex;
+    flex-direction: column;
+    width: 260px;
+    flex-shrink: 0;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    padding: 24px 18px;
+    background: var(--surface-color);
+    border-right: 1px solid rgba(255,255,255,0.06);
+    gap: 20px;
+  }
+
+  .side-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 4px 8px;
+  }
+  .side-brand-mark {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    background: rgba(16,185,129,0.15);
+    color: var(--primary-color);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .side-brand-text { display: flex; flex-direction: column; }
+  .side-brand-text strong { color: var(--text-primary); font-weight: 700; font-size: 15px; }
+  .side-brand-text span { color: var(--text-secondary); font-size: 12px; }
+
+  .side-profile-switcher {
+    display: flex;
+    background: var(--surface-highlight);
+    border-radius: 10px;
+    padding: 4px;
+    gap: 4px;
+  }
+  .side-profile-pill {
+    flex: 1;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 600;
+    transition: background 0.2s, color 0.2s;
+  }
+  .side-profile-pill:hover { color: var(--text-primary); }
+  .side-profile-pill.active {
+    background: var(--bg-color);
+    color: var(--text-primary);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  }
+
+  .side-links {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 4px;
+  }
+  .side-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 500;
+    transition: background 0.15s, color 0.15s;
+  }
+  .side-link:hover { background: rgba(255,255,255,0.04); color: var(--text-primary); }
+  .side-link.active {
+    background: rgba(16,185,129,0.12);
+    color: var(--primary-color);
+  }
+
+  .side-user-card {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 14px;
+    background: var(--surface-highlight);
+    border: 1px solid rgba(255,255,255,0.05);
+  }
+  .side-user-avatar {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    color: #0B1220;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+    font-size: 16px;
+  }
+  .side-user-meta { display: flex; flex-direction: column; min-width: 0; }
+  .side-user-meta strong { color: var(--text-primary); font-size: 14px; }
+  .side-user-meta span { color: var(--text-secondary); font-size: 11px; }
+}

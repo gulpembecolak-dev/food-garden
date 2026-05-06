@@ -1,15 +1,92 @@
 .insights-container {
   padding: var(--spacing-lg);
   padding-bottom: 120px;
-  background-color: var(--bg-color); /* Darker background resembling figma screenshot */
+  background-color: var(--bg-color);
   min-height: 100vh;
+}
+
+@media (min-width: 1024px) {
+  .insights-container {
+    padding: 40px 0;
+  }
+}
+
+.insights-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.journal-sub {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+/* Insights cards: horizontal scroll on mobile, grid on desktop */
+.insights-grid {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  margin: 0 -24px;
+  padding: 0 24px 10px;
+}
+.insights-grid::-webkit-scrollbar { display: none; }
+.insights-grid > .journal-card {
+  min-width: 220px;
+  max-width: 240px;
+  flex-shrink: 0;
+}
+
+@media (min-width: 768px) {
+  .insights-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+  }
+  .insights-grid > .journal-card {
+    min-width: 0;
+    max-width: none;
+  }
+}
+
+@media (min-width: 1024px) {
+  .pattern-grid {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
 }
 
 .journal-title {
   font-size: 28px;
   font-weight: 700;
-  color: #fff;
+  color: var(--text-primary);
   margin-bottom: var(--spacing-md);
+}
+
+.insights-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.insights-toolbar .tabs-scroll-container {
+  flex: 1;
+  border-bottom: none;
+  min-width: 0;
+}
+.insights-toolbar .journal-trigger {
+  flex-shrink: 0;
+  margin-bottom: 8px;
+}
+
+@media (max-width: 480px) {
+  .insights-toolbar .journal-trigger span:not(.journal-trigger__count) {
+    display: none;
+  }
 }
 
 .tabs-scroll-container {
@@ -29,7 +106,7 @@
 }
 
 .journal-tab {
-  color: #94A3B8;
+  color: var(--text-secondary);
   padding: 8px 0;
   font-size: 16px;
   position: relative;
@@ -37,8 +114,8 @@
 }
 
 .journal-tab.active {
-  color: #4ADE80;
-  font-weight: 500;
+  color: var(--primary-color);
+  font-weight: 600;
 }
 
 .journal-tab.active::after {
@@ -48,7 +125,7 @@
   left: 0;
   right: 0;
   height: 2px;
-  background-color: #4ADE80;
+  background-color: var(--primary-color);
   border-radius: 2px 2px 0 0;
 }
 
@@ -86,7 +163,7 @@
 .card-heading {
   font-size: 14px;
   font-weight: 600;
-  color: #fff;
+  color: var(--text-primary);
   margin-bottom: 16px;
   display: flex;
   justify-content: space-between;
@@ -102,137 +179,300 @@
 
 .card-footer-text strong {
   font-size: 13px;
-  color: #fff;
+  color: var(--text-primary);
   font-weight: 600;
 }
 
 .card-footer-text span {
   font-size: 11px;
-  color: #94A3B8;
+  color: var(--text-secondary);
 }
 
 .center-text { text-align: center; }
 
-/* Donut Chart */
-.donut-chart-container {
+/* === Nutrition Balance & Hydration shared head === */
+.nut-head {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-  height: 120px;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.card-sub {
+  display: block;
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+  line-height: 1.4;
 }
 
-.donut-wrapper {
-  position: relative;
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  background: conic-gradient(
-    #60A5FA 0% 25%,   /* Protein (Blue) */
-    #34D399 25% 65%,  /* Carbs (Greenish) */
-    #F87171 65% 75%,  /* Sugars (Red) */
-    #FBBF24 75% 100%  /* Fats (Yellow) */
-  );
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.donut-hole {
-  width: 70px;
-  height: 70px;
-  border-radius: 50%;
-  background-color: var(--surface-color);
+.nut-score {
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.nut-score-ring {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
   justify-content: center;
+  background: var(--surface-color);
+  border: 2.5px solid var(--score-color, var(--primary-color));
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--score-color, var(--primary-color)) 12%, transparent);
+}
+.nut-score-val {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.nut-score-label {
+  font-size: 9px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 600;
 }
 
-.donut-score-label {
-  font-size: 10px;
-  color: #94A3B8;
+/* === Macro rows (Nutrition Balance) === */
+.macro-rows {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
 }
-
-.donut-score-value {
-  font-size: 16px;
-  font-weight: 700;
-  color: #4ADE80;
+.macro-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
-
-.donut-labels span {
-  position: absolute;
-  font-size: 10px;
-  color: #94A3B8;
-}
-
-.dl-top-left { top: -10px; left: -25px; }
-.dl-top-right { top: 10px; right: -25px; }
-.dl-bottom-left { bottom: 0; left: -20px; }
-.dl-bottom-right { bottom: -10px; right: -25px; }
-
-
-/* Hydration SVG chart */
-.trend-chart-area {
-  position: relative;
-  flex: 1;
-}
-
-.hydration-svg {
-  width: 100%;
-  height: 80px;
-  display: block;
-}
-
-.days-row {
+.macro-row-top {
   display: flex;
   justify-content: space-between;
-  font-size: 10px;
-  color: #94A3B8;
-  margin-top: 4px;
+  align-items: baseline;
+}
+.macro-row-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.macro-row-vals {
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+.macro-row-vals strong {
+  color: var(--text-primary);
+  font-weight: 700;
+  font-size: 12px;
+}
+.macro-row-target { margin-left: 4px; }
+.macro-row-bar {
+  height: 6px;
+  background: var(--surface-highlight);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.macro-row-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--macro-color, var(--primary-color));
+  transition: width 0.5s ease;
+}
+.nut-footer {
+  margin-top: 14px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  line-height: 1.55;
 }
 
-/* Mood table */
-.mood-table {
+/* === Hydration chart === */
+.hydra-pct {
+  font-size: 14px;
+  font-weight: 700;
+  padding: 6px 10px;
+  border-radius: 10px;
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+.hydra-pct.good { background: rgba(74, 222, 128, 0.15); color: var(--color-success); }
+.hydra-pct.mid  { background: rgba(251, 191, 36, 0.15); color: var(--color-warning); }
+.hydra-pct.low  { background: rgba(248, 113, 113, 0.15); color: var(--color-danger); }
+
+.hydra-chart {
+  position: relative;
+  margin-top: 4px;
+}
+.hydra-goal-tick {
+  position: absolute;
+  right: 0;
+  top: -4px;
+  font-size: 9px;
+  color: var(--text-secondary);
+  letter-spacing: 0.04em;
+}
+.hydra-goal-line {
+  position: absolute;
+  left: 0;
+  right: 24px;
+  top: 4px;
+  border-top: 1px dashed rgba(255,255,255,0.15);
+}
+
+.hydra-bars {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 6px;
+  padding-top: 8px;
+  padding-right: 24px;
+}
+.hydra-day {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.hydra-bar-track {
+  width: 100%;
+  max-width: 14px;
+  height: 70px;
+  background: var(--surface-highlight);
+  border-radius: 999px;
+  position: relative;
+  overflow: hidden;
+}
+.hydra-bar-fill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  border-radius: 999px;
+  transition: height 0.5s ease;
+}
+.hydra-bar-fill.good { background: linear-gradient(180deg, #60A5FA 0%, #3B82F6 100%); }
+.hydra-bar-fill.mid  { background: linear-gradient(180deg, var(--color-warning) 0%, #D97706 100%); }
+.hydra-bar-fill.low  { background: linear-gradient(180deg, var(--color-danger) 0%, #DC2626 100%); }
+
+.hydra-day.best .hydra-bar-track { box-shadow: 0 0 0 1.5px rgba(96, 165, 250, 0.4); }
+
+.hydra-day-label {
+  font-size: 10px;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+}
+.hydra-day.best .hydra-day-label,
+.hydra-day.worst .hydra-day-label { color: var(--text-primary); font-weight: 600; }
+
+.hydra-meta {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+.hydra-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.hydra-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.hydra-dot.good { background: #60A5FA; }
+.hydra-dot.low  { background: var(--color-danger); }
+
+/* === Mood × Energy infographic === */
+.mood-card-wide .card-heading { margin-bottom: 16px; }
+
+.mood-rows {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+}
+
+.mood-row {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.mt-headers {
-  display: flex;
-  justify-content: space-between;
-  font-size: 10px;
-  color: #94A3B8;
-  padding-left: 10px;
-}
-
-.mt-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 10px;
-}
-
-.energy-circle {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
+.mood-row-head {
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 8px;
+}
+.mood-row-emoji { font-size: 16px; line-height: 1; }
+.mood-row-label {
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 13px;
+  flex: 1;
+}
+.mood-row-count {
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.mood-stack {
+  display: flex;
+  width: 100%;
+  height: 8px;
+  background: var(--surface-highlight);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.mood-seg {
+  display: block;
+  height: 100%;
+  transition: width 0.4s ease;
+}
+.mood-seg.up { background: var(--color-success); }
+.mood-seg.steady { background: var(--color-warning); }
+.mood-seg.down { background: var(--color-danger); }
+
+.mood-empty {
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.mood-insight {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255,255,255,0.05);
   font-size: 12px;
-  font-weight: bold;
+  color: var(--text-secondary);
+  line-height: 1.6;
 }
-
-.energy-circle.up { background-color: #FBBF24; color: #78350F; }
-.energy-circle.down { background-color: #F87171; color: #7F1D1D; }
+.mood-insight strong { color: var(--text-primary); font-weight: 600; }
 
 /* Sub headings */
 .section-heading {
   font-size: 18px;
   font-weight: 600;
-  color: #fff;
+  color: var(--text-primary);
 }
 
 /* Pattern Grid */
@@ -265,7 +505,7 @@
 
 .meal-list li {
   font-size: 14px;
-  color: #E2E8F0;
+  color: var(--text-primary);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -286,7 +526,7 @@
 
 .bar-label {
   font-size: 12px;
-  color: #94A3B8;
+  color: var(--text-secondary);
   width: 60px;
 }
 
@@ -302,7 +542,7 @@
 
 .bar-pct {
   font-size: 12px;
-  color: #E2E8F0;
+  color: var(--text-primary);
   width: 25px;
   text-align: right;
 }
@@ -321,7 +561,7 @@
   justify-content: space-between;
   align-items: center;
   font-size: 14px;
-  color: #94A3B8;
+  color: var(--text-secondary);
   padding-right: 8px;
   position: relative;
   border-right: 1px solid rgba(255,255,255,0.1);
@@ -365,10 +605,10 @@
   margin-right: 6px;
 }
 
-.s-dot.error { background-color: #F87171; }
-.s-dot.success { background-color: #4ADE80; }
-.s-dot.warning { background-color: #FBBF24; }
-.s-dot.neutral { background-color: #94A3B8; }
+.s-dot.error { background-color: var(--color-danger); }
+.s-dot.success { background-color: var(--color-success); }
+.s-dot.warning { background-color: var(--color-warning); }
+.s-dot.neutral { background-color: var(--text-secondary); }
 
 .scatter-legend {
   position: absolute;
@@ -381,7 +621,7 @@
   padding: 4px;
   border-radius: 4px;
   font-size: 10px;
-  color: #E2E8F0;
+  color: var(--text-primary);
 }
 
 .sl-item {
@@ -391,7 +631,7 @@
 
 .time-label {
   font-size: 11px;
-  color: #94A3B8;
+  color: var(--text-secondary);
   margin-top: 8px;
 }
 
@@ -416,7 +656,7 @@
 
 .gh-lbl {
   font-size: 11px;
-  color: #94A3B8;
+  color: var(--text-secondary);
 }
 
 .gh-box {
@@ -426,7 +666,7 @@
 }
 
 .gh-box.green-dark { background-color: #15803D; }
-.gh-box.green-light { background-color: #4ADE80; }
+.gh-box.green-light { background-color: var(--color-success); }
 .gh-box.yellow { background-color: #FDE047; }
 .gh-box.red { background-color: #EF4444; }
 
@@ -434,7 +674,7 @@
   display: flex;
   flex-direction: column;
   font-size: 11px;
-  color: #CBD5E1;
+  color: var(--text-primary);
 }
 
 .dot-sm {
@@ -451,51 +691,5 @@
 .dot-sm.red { background-color: #EF4444; }
 
 .text-xs { font-size: 10px; }
-.text-secondary { color: #94A3B8; }
+.text-secondary { color: var(--text-secondary); }
 
-/* Reflection Box */
-.reflection-box {
-  display: flex;
-  flex-direction: column;
-}
-
-.reflection-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #fff;
-}
-
-.reflection-desc {
-  font-size: 13px;
-  color: #94A3B8;
-  margin-bottom: 12px;
-  margin-top: 4px;
-}
-
-.reflection-input {
-  background-color: var(--surface-highlight);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 20px;
-  padding: 12px 16px;
-  color: #fff;
-  font-family: inherit;
-  font-size: 14px;
-  resize: none;
-  min-height: 50px;
-}
-
-.reflection-input::placeholder {
-  color: #64748B;
-}
-
-.outline-btn {
-  background-color: transparent;
-  border: 1px solid #4ADE80;
-  color: #4ADE80;
-  font-weight: 600;
-  margin-top: 16px;
-}
-
-.outline-btn:hover {
-  background-color: rgba(74, 222, 128, 0.1);
-}

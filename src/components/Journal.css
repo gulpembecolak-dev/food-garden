@@ -1,0 +1,211 @@
+.journal {
+  background: var(--surface-color);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 18px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  height: 100%;
+  min-height: 0;
+}
+
+.journal__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-shrink: 0;
+}
+.journal__title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.journal__author-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.04);
+}
+.journal__author-dot.sm {
+  width: 8px;
+  height: 8px;
+  box-shadow: none;
+}
+.journal__title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+.journal__sub {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+.journal__close {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--surface-highlight);
+  border: 1px solid rgba(255,255,255,0.05);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+  flex-shrink: 0;
+}
+.journal__close:hover {
+  color: var(--text-primary);
+  background: var(--bg-color);
+}
+
+/* Composer */
+.journal__composer {
+  background: var(--surface-highlight);
+  border: 1px solid rgba(255,255,255,0.04);
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: border-color 0.2s;
+  flex-shrink: 0;
+}
+.journal__composer:focus-within {
+  border-color: var(--accent, var(--primary-color));
+}
+
+.journal__input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  resize: vertical;
+  min-height: 60px;
+  max-height: 160px;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.55;
+}
+.journal__input::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.7;
+}
+
+.journal__composer-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.journal__hint {
+  font-size: 11px;
+  color: var(--text-secondary);
+  letter-spacing: 0.04em;
+}
+
+/* List */
+.journal__list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+  padding: 2px 2px 4px;
+  margin: 0;
+  flex: 1;
+  min-height: 0;
+}
+
+.journal__entry {
+  position: relative;
+  background: var(--surface-highlight);
+  border-radius: 12px;
+  padding: 12px 14px 12px 18px;
+  border: 1px solid rgba(255,255,255,0.04);
+  transition: border-color 0.15s;
+}
+.journal__entry::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 12px;
+  bottom: 12px;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--entry-accent, var(--primary-color));
+}
+.journal__entry:hover { border-color: rgba(255,255,255,0.08); }
+.journal__entry:hover .journal__delete { opacity: 1; }
+
+.journal__entry-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+.journal__author {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.journal__time {
+  font-variant-numeric: tabular-nums;
+}
+
+.journal__content {
+  color: var(--text-primary);
+  font-size: 13.5px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.journal__delete {
+  position: absolute;
+  right: 10px;
+  bottom: 8px;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 11px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s, color 0.15s;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: inherit;
+}
+.journal__delete:hover {
+  color: #F87171;
+  background: rgba(248, 113, 113, 0.08);
+}
+@media (max-width: 768px) {
+  .journal__delete { opacity: 1; }
+}
+
+/* Empty state */
+.journal__empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 12px;
+  text-align: center;
+}
+.journal__empty p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  max-width: 280px;
+}

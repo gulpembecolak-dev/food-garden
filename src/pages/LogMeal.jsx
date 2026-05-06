@@ -1,141 +1,193 @@
 import { useState } from 'react';
-import { ChevronRight, Image as ImageIcon, Edit2, Users, Sun, CloudRain, Utensils, Moon, Apple, Leaf, ArrowRight, Sprout, Smile, MapPin } from 'lucide-react';
-import PortionSelector from '../components/PortionSelector';
-import './LogMeal.css';
+import { ChevronRight, ChevronLeft, X, Image as ImageIcon, Sun, Utensils, Moon, Apple, Leaf, ArrowRight, Sprout, MapPin, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useUser } from '../context/UserContext';
+import Button from '../components/ui/Button';
+import Chip from '../components/ui/Chip';
 import { TreePlant, MushroomPlant, WheatPlant, SucculentPlant } from '../components/Plants';
+import './LogMeal.css';
+
+const STEPS = [
+  { n: 1, title: 'Choose your seed', desc: 'Pick a meal type and portion size.' },
+  { n: 2, title: 'Nutrient profile', desc: 'Scan your plate or set macros manually.' },
+  { n: 3, title: 'Garden atmosphere', desc: 'Add mood, location and social context.' },
+  { n: 4, title: 'Ready to plant', desc: 'Review and plant in your garden.' },
+];
+
+const MEAL_TYPES = [
+  { id: 'breakfast', label: 'Breakfast', Icon: Sun },
+  { id: 'lunch', label: 'Lunch', Icon: Utensils },
+  { id: 'dinner', label: 'Dinner', Icon: Moon },
+  { id: 'snack', label: 'Snack', Icon: Apple },
+];
+
+const MOODS = [
+  { id: 'happy', emoji: '😄', label: 'Happy' },
+  { id: 'stressed', emoji: '😫', label: 'Stressed' },
+  { id: 'tired', emoji: '😴', label: 'Tired' },
+  { id: 'excited', emoji: '🤩', label: 'Excited' },
+  { id: 'calm', emoji: '😌', label: 'Calm' },
+  { id: 'angry', emoji: '😤', label: 'Frustrated' },
+];
+
+const LOCATIONS = ['Home', 'Work', 'Restaurant', 'On-the-go'];
+
+const MACRO_FIELDS = [
+  { key: 'calories', label: 'Calories', unit: 'kcal', max: 1200, step: 10, color: '#FBBF24' },
+  { key: 'protein', label: 'Protein', unit: 'g', max: 80, step: 1, color: '#3B82F6' },
+  { key: 'carbs', label: 'Carbs', unit: 'g', max: 120, step: 1, color: '#F59E0B' },
+  { key: 'fats', label: 'Fats', unit: 'g', max: 50, step: 1, color: '#14B8A6' },
+];
 
 export default function LogMeal({ onAddMeal }) {
+  const navigate = useNavigate();
+  const { user } = useUser();
+
   const [step, setStep] = useState(1);
-  const [portion, setPortion] = useState('M');
-  const [portionVal, setPortionVal] = useState(2); // 1:S, 2:M, 3:L, 4:XL
+  const [portionVal, setPortionVal] = useState(2);
   const [mealType, setMealType] = useState(null);
-  const [macros, setMacros] = useState({ calories: 50, protein: 60, carbs: 40, fats: 30 });
+  const [macros, setMacros] = useState({ calories: 480, protein: 32, carbs: 58, fats: 18 });
   const [isScanned, setIsScanned] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [mood, setMood] = useState(null);
   const [social, setSocial] = useState(null);
   const [location, setLocation] = useState(null);
-  
-  const navigate = useNavigate();
 
-  const handleNext = () => setStep(step + 1);
+  const current = STEPS[step - 1];
+
+  const handleBack = () => {
+    if (step === 1) navigate('/');
+    else setStep(step - 1);
+  };
 
   const handleFinish = () => {
     if (onAddMeal) {
       onAddMeal({
         type: mealType,
-        macros: macros,
-        mood: mood,
-        location: location,
-        isNew: true
+        macros: {
+          calories: macros.calories / 10,
+          protein: macros.protein,
+          carbs: macros.carbs,
+          fats: macros.fats,
+        },
+        mood,
+        location,
+        isNew: true,
       });
     }
     navigate('/');
   };
 
-  const moodMap = {
-    happy: '😄',
-    stressed: '😫',
-    tired: '😴',
-    excited: '🤩',
-    calm: '😌',
-    angry: '😤'
-  };
+  const step1Valid = !!mealType;
+  const step2Valid = isScanned;
+  const step3Valid = !!mood && !!location && !!social;
+
+  const stepValid = step === 1 ? step1Valid : step === 2 ? step2Valid : step === 3 ? step3Valid : true;
+  const stepHint =
+    step === 1 ? (mealType ? null : 'Choose a meal type to continue') :
+    step === 2 ? (isScanned ? null : 'Scan your meal first') :
+    step === 3 ? (
+      !mood ? 'Pick how you feel' :
+      !location ? 'Where did you eat?' :
+      !social ? 'Were you alone or with others?' :
+      null
+    ) : null;
+
+  const portionLabels = ['S', 'M', 'L', 'XL'];
 
   return (
     <div className="log-container animate-fade-in">
-      <div className="log-top-bar">
-        <div className="progress-bg">
-          <div className="progress-fill" style={{width: `${step * 25}%`}}></div>
+      <header className="log-head">
+        <button className="log-icon-btn" onClick={handleBack} aria-label={step === 1 ? 'Back to home' : 'Previous step'}>
+          <ChevronLeft size={20} />
+        </button>
+        <div className="log-stepper" role="progressbar" aria-valuenow={step} aria-valuemin={1} aria-valuemax={STEPS.length}>
+          {STEPS.map((s) => (
+            <span
+              key={s.n}
+              className={`log-stepper__dot ${s.n < step ? 'done' : ''} ${s.n === step ? 'active' : ''}`}
+              style={s.n <= step ? { background: user.accent } : undefined}
+            />
+          ))}
         </div>
-        <span className="progress-text">{step * 25}%</span>
+        <button className="log-icon-btn" onClick={() => navigate('/')} aria-label="Close">
+          <X size={20} />
+        </button>
+      </header>
+
+      <div className="log-step-head">
+        <span className="log-step-tag">Step {step} of {STEPS.length}</span>
+        <h1 className="log-step-title">{current.title}</h1>
+        <p className="log-step-desc">{current.desc}</p>
       </div>
 
       {step === 1 && (
-        <div className="step-content no-padding-top animate-fade-in">
-          <h1 className="step-main-title mt-4">Step 1 of 4: Choose Your Seed</h1>
-          
-          <div className="meal-section mt-8">
-            <h3 className="meal-section-title">Meal Type Selector</h3>
+        <div className="step-content animate-fade-in">
+          <section className="meal-section">
+            <h3 className="meal-section-title">Meal type</h3>
             <div className="meal-types-row">
-              <button className={`meal-btn ${mealType === 'breakfast' ? 'active' : ''}`} onClick={() => setMealType('breakfast')}>
-                <Sun size={28} />
-                <span>Breakfast</span>
-              </button>
-              <button className={`meal-btn ${mealType === 'lunch' ? 'active' : ''}`} onClick={() => setMealType('lunch')}>
-                <Utensils size={28} />
-                <span>Lunch</span>
-              </button>
-              <button className={`meal-btn ${mealType === 'dinner' ? 'active' : ''}`} onClick={() => setMealType('dinner')}>
-                <Moon size={28} />
-                <span>Dinner</span>
-              </button>
-              <button className={`meal-btn ${mealType === 'snack' ? 'active' : ''}`} onClick={() => setMealType('snack')}>
-                <Apple size={28} />
-                <span>Snack</span>
-              </button>
+              {MEAL_TYPES.map(({ id, label, Icon }) => (
+                <button
+                  key={id}
+                  className={`meal-btn ${mealType === id ? 'active' : ''}`}
+                  onClick={() => setMealType(id)}
+                  aria-pressed={mealType === id}
+                  style={mealType === id ? { borderColor: user.accent, color: user.accent } : undefined}
+                >
+                  <Icon size={26} />
+                  <span>{label}</span>
+                </button>
+              ))}
             </div>
-          </div>
+          </section>
 
-          <div className="meal-section mt-12">
-            <h3 className="meal-section-title">Portion Slider</h3>
+          <section className="meal-section">
+            <h3 className="meal-section-title">Portion size</h3>
             <div className="portion-slider-card">
                <div className="ps-header">
                   <div className="ps-icon"><Leaf size={16}/><span>Seed</span></div>
                   <ArrowRight size={14} className="ps-arrow"/>
                   <div className="ps-icon"><Sprout size={24}/><span>Sapling</span></div>
                </div>
-               
-               <input 
-                 type="range" min="1" max="4" value={portionVal} 
-                 onChange={e => {
-                   const val = Number(e.target.value);
-                   setPortionVal(val);
-                   setPortion(['S','M','L','XL'][val - 1]);
-                 }} 
-                 style={{
-                   '--thumb-size': `${16 + (portionVal - 1) * 6}px`,
-                   '--fill-pct': `${((portionVal - 1) / 3) * 100}%`
-                 }}
-                 className="ps-range mt-4" 
-               />
-               
-               <div className="ps-marks">
-                 <span>S</span><span style={{paddingRight:'8px'}}>M</span><span>L</span><span>XL</span>
-               </div>
-               <div className="ps-label text-center mt-2">Portion Size</div>
-            </div>
-          </div>
 
-          <button 
-            className="primary-btn mt-12" 
-            onClick={handleNext}
-            disabled={!mealType}
-          >
-            <span>Next</span>
-            <ChevronRight size={20} className="arrow-icon" />
-          </button>
+               <input
+                 type="range" min="1" max="4" value={portionVal}
+                 onChange={e => setPortionVal(Number(e.target.value))}
+                 aria-label="Portion size"
+                 style={{
+                   '--thumb-size': `${16 + (portionVal - 1) * 4}px`,
+                   '--fill-pct': `${((portionVal - 1) / 3) * 100}%`,
+                 }}
+                 className="ps-range"
+               />
+
+               <div className="ps-marks">
+                 {portionLabels.map((l, i) => (
+                   <span key={l} className={portionVal === i + 1 ? 'active' : ''}>{l}</span>
+                 ))}
+               </div>
+            </div>
+          </section>
         </div>
       )}
 
       {step === 2 && (
-        <div className="step-content no-padding-top animate-fade-in">
-          <h1 className="step-main-title mt-4">Step 2 of 4: Nutrient Profile</h1>
-          
+        <div className="step-content animate-fade-in">
           {!isScanned ? (
-            <div className="scan-prompt-area mt-8 animate-fade-in">
+            <div className="scan-prompt-area animate-fade-in">
                <div className="scan-icon-circle">
-                  <ImageIcon size={48} color="#94A3B8" />
+                  <ImageIcon size={44} color="var(--text-secondary)" />
                </div>
-               <h3 className="mt-6 text-white text-xl font-semibold">Scan with AI</h3>
-               <p className="text-gray-400 mt-4 text-center text-sm leading-relaxed">
-                 Take a photo of your plate. Let our AI analyze the ingredients and calculate the macros for your garden.
+               <h3 className="scan-title">Scan with AI</h3>
+               <p className="scan-desc">
+                 Take a photo of your plate. The app analyzes ingredients and estimates macros automatically.
                </p>
-               
-               <button 
-                 className="primary-btn mt-8" 
+
+               <Button
+                 variant="primary"
+                 size="lg"
+                 iconLeft={<Sparkles size={18} />}
                  onClick={() => {
                     setIsScanning(true);
                     setTimeout(() => {
@@ -145,155 +197,146 @@ export default function LogMeal({ onAddMeal }) {
                  }}
                  disabled={isScanning}
                >
-                 {isScanning ? (
-                   <span>Scanning...</span>
-                 ) : (
-                   <>
-                      <ImageIcon size={20} className="arrow-icon"/>
-                      <span>Snap Photo</span>
-                   </>
-                 )}
+                 {isScanning ? 'Scanning…' : 'Snap photo'}
+               </Button>
+
+               <button className="link-btn" onClick={() => { setIsScanned(true); setIsEditing(true); }}>
+                 Skip and enter manually
                </button>
             </div>
           ) : (
-            <div className="ai-card mt-6 animate-fade-in">
+            <div className="ai-card animate-fade-in">
                <div className="ai-header-flex">
                   <div className="ai-food-img">
-                     <img src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&q=80&w=150" alt="food" />
+                     <img src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&q=80&w=150" alt="meal" />
                   </div>
                   <div className="ai-info-flex">
                      <div className="ai-row-top">
-                       <span className="ai-label">AI Analysis:</span>
-                       <span className="ai-badge">High Confidence</span>
+                       <span className="ai-label">AI analysis</span>
+                       <span className="ai-badge">High confidence</span>
                      </div>
-                     <div className="ai-dish-name">Healthy Salmon Bowl</div>
+                     <div className="ai-dish-name">Healthy salmon bowl</div>
                   </div>
                </div>
-               
+
                <div className="ai-divider"></div>
-               
+
                <div className="macro-breakdown">
-                  <span className="mb-title">Macro Breakdown</span>
-                  <div className="v-sliders-wrap mt-6">
-                     {[ 
-                       { label: 'Calories', valKey: 'calories' },
-                       { label: 'Protein', valKey: 'protein' },
-                       { label: 'Carbs', valKey: 'carbs' },
-                       { label: 'Fats', valKey: 'fats' }
-                     ].map((item, i) => (
-                       <div key={i} className="v-slider-col">
-                          <div className="v-label-group">
-                             <span className="v-slider-label">{item.label}</span>
-                             <span className="v-slider-val">
-                               {item.valKey === 'calories' ? `${macros.calories * 10} kcal` : `${macros[item.valKey]}g`}
-                             </span>
-                          </div>
-                          <div className="v-track-box">
-                             <div className="v-fill" style={{height: `${macros[item.valKey]}%`}}></div>
+                  <div className="macro-head">
+                    <span className="mb-title">Macro breakdown</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setIsEditing(v => !v)}
+                    >
+                      {isEditing ? 'Done' : 'Edit'}
+                    </Button>
+                  </div>
+
+                  <div className="macro-list">
+                    {MACRO_FIELDS.map(field => {
+                      const val = macros[field.key];
+                      const pct = Math.round((val / field.max) * 100);
+                      return (
+                        <div key={field.key} className="macro-row">
+                          <div className="macro-row-head">
+                            <span className="macro-label">{field.label}</span>
+                            <span className="macro-val">{val} {field.unit}</span>
                           </div>
                           {isEditing ? (
-                            <div className="v-controls animate-fade-in">
-                              <button className="v-btn" onClick={() => setMacros({...macros, [item.valKey]: Math.min(100, macros[item.valKey] + 10)})}>+</button>
-                              <button className="v-btn" onClick={() => setMacros({...macros, [item.valKey]: Math.max(0, macros[item.valKey] - 10)})}>-</button>
-                            </div>
+                            <input
+                              type="range"
+                              min="0"
+                              max={field.max}
+                              step={field.step}
+                              value={val}
+                              onChange={e => setMacros({ ...macros, [field.key]: Number(e.target.value) })}
+                              aria-label={field.label}
+                              className="macro-range"
+                              style={{
+                                '--macro-color': field.color,
+                                '--macro-fill': `${pct}%`,
+                              }}
+                            />
                           ) : (
-                            <div className="v-controls-placeholder" style={{height: '26px'}}></div>
+                            <div className="macro-bar">
+                              <div className="macro-bar-fill" style={{ width: `${pct}%`, background: field.color }} />
+                            </div>
                           )}
-                       </div>
-                     ))}
+                        </div>
+                      );
+                    })}
                   </div>
                </div>
-            </div>
-          )}
-
-          {isScanned && (
-            <div className="animate-fade-in">
-              <button className="primary-btn mt-12" onClick={handleNext}>
-                <span>Looks Good</span>
-                <ChevronRight size={20} className="arrow-icon" />
-              </button>
-              
-              {!isEditing && (
-                <div style={{ textAlign: 'center', marginTop: '24px' }}>
-                  <button 
-                    onClick={() => setIsEditing(true)} 
-                    style={{ background:'none', border:'none', color: '#94A3B8', fontSize: '14px', textDecoration: 'underline', cursor: 'pointer' }}>
-                    Edit Manually
-                  </button>
-                </div>
-              )}
             </div>
           )}
         </div>
       )}
 
       {step === 3 && (
-        <div className="step-content no-padding-top animate-fade-in">
-          <h1 className="step-main-title mt-4">Step 3 of 4: Garden Atmosphere</h1>
-          
-          <div className="meal-section mt-8">
-             <h3 className="meal-section-title">Mood Grid</h3>
+        <div className="step-content animate-fade-in">
+          <section className="meal-section">
+             <h3 className="meal-section-title">How do you feel?</h3>
              <div className="mood-grid">
-                {[
-                  { id: 'happy', emoji: '😄', sub: '☀️' },
-                  { id: 'stressed', emoji: '😫', sub: '☁️' },
-                  { id: 'tired', emoji: '😴', sub: '💤' },
-                  { id: 'excited', emoji: '🤩', sub: '✨' },
-                  { id: 'calm', emoji: '😌', sub: '🌱' },
-                  { id: 'angry', emoji: '😤', sub: '⚡' }
-                ].map(m => (
-                  <div key={m.id} className={`mood-card ${mood === m.id ? 'active' : ''}`} onClick={() => setMood(m.id)}>
-                     <span className="mood-sub-icon">{m.sub}</span>
+                {MOODS.map(m => (
+                  <button
+                    key={m.id}
+                    className={`mood-card ${mood === m.id ? 'active' : ''}`}
+                    onClick={() => setMood(m.id)}
+                    aria-pressed={mood === m.id}
+                    style={mood === m.id ? { borderColor: user.accent, boxShadow: `0 4px 20px ${user.accent}30` } : undefined}
+                  >
                      <span className="mood-emoji">{m.emoji}</span>
-                  </div>
+                     <span className="mood-label">{m.label}</span>
+                  </button>
                 ))}
              </div>
-          </div>
-          
-          <div className="meal-section mt-10">
-             <h3 className="meal-section-title">Location Chips</h3>
-             <div className="chips-row">
-                {['Home', 'Work', 'Restaurant', 'On-the-go'].map(loc => (
-                  <button 
-                    key={loc} 
-                    className={`location-chip ${location === loc ? 'active' : ''}`}
-                    onClick={() => setLocation(loc)}
-                  >{loc}</button>
-                ))}
-             </div>
-          </div>
-          
-          <div className="meal-section mt-10">
-             <h3 className="meal-section-title">Social Context</h3>
-             <div className="segment-ctrl">
-                <button className={`segment-btn ${social === 'alone' ? 'active' : ''}`} onClick={() => setSocial('alone')}>Eating Alone</button>
-                <button className={`segment-btn ${social === 'others' ? 'active' : ''}`} onClick={() => setSocial('others')}>With Others</button>
-             </div>
-          </div>
+          </section>
 
-          <button 
-             className="primary-btn mt-12" 
-             onClick={handleNext}
-             disabled={!mood || !location || !social}
-          >
-            <span>Next</span>
-            <ChevronRight size={20} className="arrow-icon" />
-          </button>
+          <section className="meal-section">
+             <h3 className="meal-section-title">Where are you?</h3>
+             <div className="chips-row">
+                {LOCATIONS.map(loc => (
+                  <Chip
+                    key={loc}
+                    active={location === loc}
+                    onClick={() => setLocation(loc)}
+                    accent={user.accent}
+                  >{loc}</Chip>
+                ))}
+             </div>
+          </section>
+
+          <section className="meal-section">
+             <h3 className="meal-section-title">Eating with…</h3>
+             <div className="segment-ctrl">
+                <button
+                  className={`segment-btn ${social === 'alone' ? 'active' : ''}`}
+                  onClick={() => setSocial('alone')}
+                  aria-pressed={social === 'alone'}
+                  style={social === 'alone' ? { color: user.accent } : undefined}
+                >Alone</button>
+                <button
+                  className={`segment-btn ${social === 'others' ? 'active' : ''}`}
+                  onClick={() => setSocial('others')}
+                  aria-pressed={social === 'others'}
+                  style={social === 'others' ? { color: user.accent } : undefined}
+                >With others</button>
+             </div>
+          </section>
         </div>
       )}
 
       {step === 4 && (
-        <div className="step-content no-padding-top animate-fade-in">
-          <h1 className="step-main-title mt-4">Step 4 of 4: Ready to Plant?</h1>
-          
-          <div className="summary-card mt-8">
+        <div className="step-content animate-fade-in">
+          <div className="summary-card">
              <div className="sum-content">
-                <h3 className="sum-title">Summary Card</h3>
+                <h3 className="sum-title">Summary</h3>
                 <ul className="sum-list">
-                  <li><Utensils size={16} className="sum-icon"/> <span className="capitalize">{mealType || 'Meal'}</span> | {macros.calories * 10} kcal</li>
+                  <li><Utensils size={16} className="sum-icon"/> <span className="capitalize">{mealType || 'Meal'}</span> · {macros.calories} kcal</li>
                   <li>
-                    <span style={{ fontSize: '16px', lineHeight: 1, marginRight: '4px' }}>{moodMap[mood] || '😐'}</span> 
-                    <span className="capitalize">{mood || 'Neutral'}</span> Mood
+                    <span style={{ fontSize: '16px', lineHeight: 1 }}>{MOODS.find(m => m.id === mood)?.emoji || '😐'}</span>
+                    <span className="capitalize">{mood || 'Neutral'}</span> · {social === 'alone' ? 'alone' : 'with others'}
                   </li>
                   <li><MapPin size={16} className="sum-icon"/> <span className="capitalize">{location || 'Unknown'}</span></li>
                 </ul>
@@ -302,17 +345,17 @@ export default function LogMeal({ onAddMeal }) {
                 <img src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&q=80&w=150" alt="meal summary" />
              </div>
           </div>
-          
-          <div className="preview-card mt-6">
-             <h3 className="sum-title">Visual Preview</h3>
-             <span className="sum-subtitle">Based on your macros, this plant will grow</span>
-             <div className="plant-preview-area mt-4" style={{ transform: 'scale(1.4)' }}>
+
+          <div className="preview-card">
+             <h3 className="sum-title">Visual preview</h3>
+             <span className="sum-subtitle">Your macros will grow into this plant.</span>
+             <div className="plant-preview-area" style={{ transform: 'scale(1.4)' }}>
                 {(() => {
                   let pType = 'protein';
                   if (macros.carbs > macros.protein && macros.carbs > macros.fats) pType = 'carbs';
                   else if (macros.fats > macros.protein && macros.fats > macros.carbs) pType = 'fats';
                   else if (mealType === 'snack') pType = 'sugars';
-                  
+
                   if (pType === 'protein') return <TreePlant isNew={false} />;
                   if (pType === 'carbs') return <WheatPlant isNew={false} />;
                   if (pType === 'sugars') return <MushroomPlant isNew={false} />;
@@ -320,12 +363,41 @@ export default function LogMeal({ onAddMeal }) {
                 })()}
              </div>
           </div>
-
-          <button className="primary-btn mt-12" onClick={handleFinish}>
-            <span>Plant in My Garden</span>
-          </button>
         </div>
       )}
+
+      <footer className="log-footer">
+        {stepHint && <p className="log-hint">{stepHint}</p>}
+        <div className="log-footer-actions">
+          {step > 1 && (
+            <Button variant="secondary" size="lg" onClick={handleBack} iconLeft={<ChevronLeft size={18} />}>
+              Back
+            </Button>
+          )}
+          {step < 4 ? (
+            <Button
+              variant="primary"
+              size="lg"
+              onClick={() => setStep(step + 1)}
+              disabled={!stepValid}
+              iconRight={<ChevronRight size={18} />}
+              className="log-next-btn"
+            >
+              Next
+            </Button>
+          ) : (
+            <Button
+              variant="primary"
+              size="lg"
+              onClick={handleFinish}
+              iconLeft={<Sprout size={18} />}
+              className="log-next-btn"
+            >
+              Plant in my garden
+            </Button>
+          )}
+        </div>
+      </footer>
     </div>
   );
 }
