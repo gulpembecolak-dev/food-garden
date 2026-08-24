@@ -3,8 +3,8 @@
   inset: 0;
   z-index: 200;
   background:
-    radial-gradient(ellipse at top, rgba(16, 185, 129, 0.12) 0%, transparent 55%),
-    radial-gradient(ellipse at bottom right, rgba(245, 158, 11, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at top, rgba(57, 121, 60, 0.12) 0%, transparent 55%),
+    radial-gradient(ellipse at bottom right, rgba(195, 118, 8, 0.08) 0%, transparent 50%),
     var(--bg-color);
   display: flex;
   flex-direction: column;
@@ -33,7 +33,7 @@
   align-items: center;
   gap: 6px;
   background: var(--surface-color);
-  border: 1px solid rgba(255,255,255,0.05);
+  border: 1px solid rgba(37, 49, 33,0.05);
   color: var(--text-secondary);
   padding: 8px 12px;
   border-radius: 999px;
@@ -119,64 +119,223 @@
   gap: 6px;
   padding: 6px 12px;
   background: var(--surface-color);
-  border: 1px solid rgba(255,255,255,0.05);
+  border: 1px solid rgba(37, 49, 33,0.05);
   border-radius: 999px;
   font-size: 11px;
   color: var(--text-secondary);
 }
 
-/* Final slide: profile pickers */
-.ob-slide--final { gap: 0; }
-.ob-profiles {
+/* Phase stepper: Account → About you → Your goal → Tour */
+.ob-phases {
+  display: flex;
+  justify-content: center;
+  gap: 22px;
+  list-style: none;
+  margin: 6px auto 0;
+  padding: 0;
+}
+.ob-phase {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-secondary);
+  opacity: 0.55;
+  transition: opacity 0.2s;
+}
+.ob-phase.active, .ob-phase.done { opacity: 1; }
+.ob-phase-dot {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  background: var(--surface-color);
+  border: 1.5px solid rgba(37, 49, 33,0.1);
+  color: var(--text-secondary);
+}
+.ob-phase.active .ob-phase-dot {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary-color) 12%, transparent);
+}
+.ob-phase.done .ob-phase-dot {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+  color: #10240F;
+}
+.ob-phase-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.ob-phase.active .ob-phase-label { color: var(--text-primary); }
+
+/* Sign-up brand mark */
+.ob-brand { margin-bottom: 18px; }
+.ob-brand-mark {
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--primary-color) 15%, transparent);
+  border: 1.5px solid color-mix(in srgb, var(--primary-color) 45%, transparent);
+  color: var(--primary-color);
+}
+
+.ob-privacy {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 20px;
+  padding: 7px 13px;
+  background: var(--surface-color);
+  border: 1px solid rgba(37, 49, 33,0.05);
+  border-radius: 999px;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+.ob-privacy svg { color: var(--primary-color); flex-shrink: 0; }
+
+/* Form phases */
+.ob-slide--form { gap: 0; }
+
+.ob-form {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
   width: 100%;
   margin-top: 24px;
+  text-align: left;
 }
 
-.ob-profile {
-  background: var(--surface-color);
-  border: 1.5px solid rgba(255,255,255,0.06);
-  border-radius: 16px;
-  padding: 20px 16px;
+.ob-field {
   display: flex;
   flex-direction: column;
+  gap: 6px;
+}
+.ob-field--wide { grid-column: 1 / -1; }
+.ob-form--column {
+  grid-template-columns: 1fr;
+  max-width: 360px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.ob-field > span {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+}
+
+.ob-field input,
+.ob-field select {
+  background: var(--surface-color);
+  border: 1.5px solid rgba(37, 49, 33,0.08);
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-family: inherit;
+  font-size: 15px;
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 0.15s;
+  width: 100%;
+}
+.ob-field input:focus,
+.ob-field select:focus {
+  border-color: var(--primary-color);
+}
+.ob-field input::placeholder { color: var(--text-secondary); opacity: 0.5; }
+
+/* hide number spinners for a cleaner look */
+.ob-field input[type='number']::-webkit-outer-spin-button,
+.ob-field input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.ob-field input[type='number'] { -moz-appearance: textfield; appearance: textfield; }
+
+/* Input with a unit suffix (yrs / kg / cm) */
+.ob-input-unit { position: relative; }
+.ob-input-unit input { padding-right: 52px; }
+.ob-input-unit em {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-style: normal;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  pointer-events: none;
+}
+
+/* Segmented control (gender) — same height as inputs */
+.ob-segment {
+  display: flex;
+  gap: 4px;
+  background: var(--surface-color);
+  border: 1.5px solid rgba(37, 49, 33,0.08);
+  border-radius: 12px;
+  padding: 4px;
+}
+.ob-segment button {
+  flex: 1;
+  padding: 9px 8px;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: transparent;
+  transition: background 0.15s, color 0.15s;
+}
+.ob-segment button:hover { color: var(--text-primary); }
+.ob-segment button.active {
+  background: color-mix(in srgb, var(--primary-color) 18%, transparent);
+  color: var(--primary-color);
+}
+
+.ob-preview {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 20px;
+  animation: obSlideIn 0.3s ease;
+}
+.ob-preview-item--muted {
+  border-color: rgba(37, 49, 33,0.08);
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+.ob-preview-item--muted svg { color: var(--text-secondary); }
+.ob-preview-item {
+  display: inline-flex;
   align-items: center;
   gap: 6px;
-  cursor: pointer;
-  font-family: inherit;
-  transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s;
-}
-.ob-profile:hover {
-  border-color: var(--profile-accent);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px color-mix(in srgb, var(--profile-accent) 15%, transparent);
-}
-.ob-profile.active {
-  border-color: var(--profile-accent);
-}
-.ob-profile-avatar {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #062a1f;
-  font-weight: 700;
-  font-size: 20px;
-  margin-bottom: 4px;
-}
-.ob-profile-name {
-  font-size: 15px;
+  padding: 7px 13px;
+  background: var(--surface-color);
+  border: 1px solid color-mix(in srgb, var(--primary-color) 35%, transparent);
+  border-radius: 999px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--text-primary);
 }
-.ob-profile-tag {
-  font-size: 11px;
-  color: var(--text-secondary);
-  letter-spacing: 0.02em;
+.ob-preview-item svg { color: var(--primary-color); }
+
+.ob-form-hint {
+  margin-top: 18px;
+  font-size: 12px;
+  color: var(--color-warning);
 }
 
 /* Footer with dots + actions */
@@ -204,7 +363,7 @@
   width: 24px;
   border-radius: 999px;
 }
-.ob-dot.done { background: rgba(16, 185, 129, 0.5); }
+.ob-dot.done { background: rgba(57, 121, 60, 0.5); }
 
 .ob-actions {
   display: flex;
@@ -222,3 +381,204 @@
   }
   .ob-stage { padding: 60px 0; }
 }
+
+/* Welcome landing — poster wordmark + sparse cut-paper veggies */
+.ob-welcome {
+  position: static; /* let veggies position against the full onboarding screen */
+}
+.ob-veg {
+  position: absolute;
+  opacity: 0.95;
+  pointer-events: none;
+}
+@media (max-width: 480px) {
+  .ob-veg svg { transform: scale(0.8); }
+}
+
+.ob-wordmark {
+  width: min(340px, 78vw);
+  height: auto;
+  margin-bottom: 18px;
+}
+
+.ob-welcome-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 300px;
+  margin-top: 30px;
+}
+.ob-welcome-actions .ui-btn { width: 100%; }
+
+/* Login: no-account notice */
+.ob-login-notice {
+  margin-top: 22px;
+  padding: 16px 18px;
+  background: var(--surface-color);
+  border: 1px solid rgba(196, 144, 8, 0.45);
+  border-radius: 14px;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: obSlideIn 0.25s ease;
+}
+.ob-login-notice p {
+  font-size: 13px;
+  color: var(--text-primary);
+  line-height: 1.55;
+  margin: 0;
+}
+
+/* Sign-up: watering-can collage replaces the brand chip */
+.ob-signup-art {
+  width: min(170px, 42vw);
+  height: auto;
+  margin-bottom: 12px;
+}
+
+/* About you: stepper rows (− value +) */
+.ob-stepper-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  max-width: 380px;
+  margin: 24px auto 0;
+  text-align: left;
+}
+.ob-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--surface-color);
+  border: 1.5px solid rgba(37, 49, 33, 0.08);
+  border-radius: 14px;
+  padding: 10px 10px 10px 16px;
+}
+.ob-stepper-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.ob-stepper-ctrl {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.ob-stepper-ctrl > button {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-highlight);
+  color: var(--text-primary);
+  font-family: inherit;
+  transition: background 0.15s, transform 0.1s;
+}
+.ob-stepper-ctrl > button:active {
+  background: color-mix(in srgb, var(--primary-color) 22%, transparent);
+  transform: scale(0.94);
+}
+.ob-stepper-val {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  min-width: 74px;
+  justify-content: center;
+}
+.ob-stepper-val input {
+  width: 48px;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-align: right;
+  outline: none;
+  padding: 0;
+  font-variant-numeric: tabular-nums;
+}
+.ob-stepper-val input::-webkit-outer-spin-button,
+.ob-stepper-val input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.ob-stepper-val input[type='number'] { -moz-appearance: textfield; appearance: textfield; }
+.ob-stepper-val em {
+  font-style: normal;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+/* Fixed-height slot for live previews — layout must not jump when they appear */
+.ob-preview-slot {
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 16px;
+  width: 100%;
+}
+.ob-preview-slot .ob-preview { margin-top: 0; }
+
+/* Veggie avatar picker */
+.ob-avatar-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.ob-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: var(--surface-color);
+  border: 2px solid rgba(37, 49, 33, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px;
+  transition: border-color 0.15s, background 0.15s, transform 0.1s;
+}
+.ob-avatar img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+.ob-avatar:active { transform: scale(0.93); }
+.ob-avatar.active {
+  border-color: var(--primary-color);
+  background: color-mix(in srgb, var(--primary-color) 14%, var(--surface-color));
+}
+
+/* About you: the big circle mirrors the selected veggie avatar */
+.ob-icon--avatar img {
+  max-width: 58%;
+  max-height: 64%;
+  object-fit: contain;
+}
+
+/* Tour slides: cut-paper art instead of icon circles */
+.ob-slide-art {
+  height: 112px;
+  width: auto;
+  max-width: 60vw;
+  object-fit: contain;
+  margin-bottom: 26px;
+}
+
+/* Login: faded full-page poster behind the form */
+.ob-bg-poster {
+  position: absolute;
+  inset: 0;
+  background: url('/login-bg.png') center / cover no-repeat;
+  opacity: 0.13;
+  pointer-events: none;
+}
+.ob-stage, .ob-footer, .ob-phases { position: relative; }

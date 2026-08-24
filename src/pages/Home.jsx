@@ -1,71 +1,93 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Settings, Bell, Sun, Droplet, Plus, Utensils, Flame, Smile } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { Settings, Bell, Droplet, Plus, Utensils, Flame, Smile, User, LogOut } from 'lucide-react';
 import './Home.css';
 import { useUser } from '../context/UserContext';
-import Recommendation from '../components/Recommendation';
+import { useMeals, dominantMacro, GLASS_ML } from '../context/MealsContext';
+import { SunGlyph, RainGlyph, CactusGlyph } from '../components/WeatherGlyphs';
 
 import { TreePlant, MushroomPlant, WheatPlant, SucculentPlant } from '../components/Plants';
 
-export default function Home({ meals = [] }) {
+const NEW_MEAL_WINDOW_MS = 5000;
+
+function greeting(hour) {
+  if (hour < 6) return 'Good night';
+  if (hour < 12) return 'Good morning';
+  if (hour < 18) return 'Good afternoon';
+  return 'Good evening';
+}
+
+function plantFor(macroType, isNew) {
+  if (macroType === 'carbs') return <WheatPlant isNew={isNew} />;
+  if (macroType === 'sugars') return <MushroomPlant isNew={isNew} />;
+  if (macroType === 'fats') return <SucculentPlant isNew={isNew} />;
+  return <TreePlant isNew={isNew} />;
+}
+
+export default function Home() {
   const navigate = useNavigate();
-  const { user } = useUser();
-  const [hydration, setHydration] = useState(60);
+  const { user, logout } = useUser();
+  const { todayMeals, todayWaterMl, addWater } = useMeals();
   const [modalType, setModalType] = useState(null); // 'settings' | 'notifications' | null
-  const [, setForceRender] = useState(0);
+  const [now, setNow] = useState(() => new Date());
 
-  // Strip isNew flag after 4 seconds
+  // A meal logged in the last few seconds sprouts with an animation;
+  // re-render once the window has passed so the class drops off.
   useEffect(() => {
-     let hasNew = false;
-     meals.forEach(m => {
-        if (m.isNew) hasNew = true;
-     });
-     if (hasNew) {
-        const timer = setTimeout(() => {
-           meals.forEach(m => m.isNew = false);
-           setForceRender(prev => prev + 1); // trigger re-render to strip classes
-        }, 4000);
-        return () => clearTimeout(timer);
-     }
-  }, [meals]);
+    const newest = todayMeals.reduce((max, m) => Math.max(max, new Date(m.loggedAt).getTime()), 0);
+    const remaining = newest + NEW_MEAL_WINDOW_MS - Date.now();
+    if (remaining > 0) {
+      const timer = setTimeout(() => setNow(new Date()), remaining + 50);
+      return () => clearTimeout(timer);
+    }
+  }, [todayMeals]);
 
-  // 10% = 250ml. 100% = 2.5 Liters
-  const addHydration = () => {
-    setHydration(prev => Math.min(prev + 10, 100));
-  };
+  const hydrationTargetMl = user.targets.hydrationL * 1000;
+  const hydrationPct = Math.min(100, Math.round((todayWaterMl / hydrationTargetMl) * 100));
+  const hydrationLiters = (todayWaterMl / 1000).toFixed(1);
 
-  const removeHydration = () => {
-    setHydration(prev => Math.max(prev - 10, 0));
-  };
-
-  const consumedCalories = meals.reduce((sum, m) => sum + (m.macros?.calories ?? 0) * 10, 0);
-  const consumedProtein = meals.reduce((sum, m) => sum + (m.macros?.protein ?? 0), 0);
+  const consumedCalories = todayMeals.reduce((sum, m) => sum + (m.macros?.calories ?? 0), 0);
+  const consumedProtein = todayMeals.reduce((sum, m) => sum + (m.macros?.protein ?? 0), 0);
   const calPct = Math.min(100, Math.round((consumedCalories / user.targets.calories) * 100));
   const protPct = Math.min(100, Math.round((consumedProtein / user.targets.protein) * 100));
 
-  const hydrationLiters = ((hydration / 100) * user.targets.hydrationL).toFixed(1);
-
-  let topMood = 'None Yet';
-  if (meals.length > 0) {
-    const moodCounts = meals.reduce((acc, m) => {
-      if (m.mood) {
-         acc[m.mood] = (acc[m.mood] || 0) + 1;
-      }
+  let topMood = 'None yet';
+  if (todayMeals.length > 0) {
+    const moodCounts = todayMeals.reduce((acc, m) => {
+      if (m.mood) acc[m.mood] = (acc[m.mood] || 0) + 1;
       return acc;
     }, {});
     if (Object.keys(moodCounts).length > 0) {
-       const maxMood = Object.entries(moodCounts).reduce((a, b) => a[1] > b[1] ? a : b)[0];
-       topMood = maxMood.charAt(0).toUpperCase() + maxMood.slice(1);
+      const maxMood = Object.entries(moodCounts).reduce((a, b) => a[1] > b[1] ? a : b)[0];
+      topMood = maxMood.charAt(0).toUpperCase() + maxMood.slice(1);
     }
   }
+
+  // Garden weather follows today's hydration — watering keeps it green.
+  const weather = hydrationPct >= 80
+    ? { Glyph: RainGlyph, label: 'Lush' }
+    : hydrationPct >= 40
+    ? { Glyph: SunGlyph, label: 'Fair' }
+    : { Glyph: CactusGlyph, label: 'Dry' };
+
+  const totalPlots = Math.max(4, todayMeals.length);
+  const dateLabel = now.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+
+  // Notifications derived from today's actual state — nothing pre-scripted.
+  const notifications = [];
+  if (todayMeals.length === 0) notifications.push({ icon: '🌱', text: 'Nothing planted yet today — log your first meal.' });
+  if (hydrationPct < 50) notifications.push({ icon: '💧', text: `Hydration at ${hydrationPct}% — your garden could use water.` });
+  if (protPct >= 100) notifications.push({ icon: '💪', text: `Protein target reached (${consumedProtein}g / ${user.targets.protein}g).` });
+  if (calPct >= 100) notifications.push({ icon: '🔥', text: `Calorie target reached for today.` });
+  if (notifications.length === 0) notifications.push({ icon: '✅', text: 'All quiet — your garden is on track.' });
 
   return (
     <div className="home-container animate-fade-in">
       {/* Header */}
       <header className="main-header">
         <div className="header-text">
-          <h1 className="main-greeting">Good morning,<br/>{user.name}</h1>
-          <p className="main-date">Friday, March 13 · {user.targets.calories} kcal target</p>
+          <h1 className="main-greeting">{greeting(now.getHours())},<br/>{user.name}</h1>
+          <p className="main-date">{dateLabel} · {user.targets.calories} kcal target</p>
         </div>
         <div className="header-actions">
           <button className="icon-btn" aria-label="Settings" onClick={() => setModalType('settings')}><Settings size={24} /></button>
@@ -75,42 +97,35 @@ export default function Home({ meals = [] }) {
 
       {/* Main Content Area */}
       <div className="content-grid mt-8">
-        
+
         {/* Left: Garden Plot */}
         <div className="garden-plot-card">
           <div className="plot-header">
             <div className="plot-titles">
-              <h2>Garden plot</h2>
-              <span>{meals.length} of 4 plots planted</span>
+              <h2>Today's garden</h2>
+              <span>{todayMeals.length} of {totalPlots} plots planted</span>
             </div>
-            <div className="weather-icon">
-              <Sun size={14} color="#FBBF24" />
-              <span>Sunny</span>
+            <div className="weather-icon" title={`Hydration ${hydrationPct}%`}>
+              <weather.Glyph size={15} />
+              <span>{weather.label}</span>
             </div>
           </div>
 
           <div className="plants-grid mt-6">
-            {meals.map((meal, idx) => {
-              let pType = 'protein';
-              if (meal.macros && meal.macros.carbs > meal.macros.protein && meal.macros.carbs > meal.macros.fats) pType = 'carbs';
-              else if (meal.macros && meal.macros.fats > meal.macros.protein && meal.macros.fats > meal.macros.carbs) pType = 'fats';
-              else if (meal.type === 'snack') pType = 'sugars';
-              
+            {todayMeals.map((meal) => {
+              const isNew = now.getTime() - new Date(meal.loggedAt).getTime() < NEW_MEAL_WINDOW_MS;
               return (
-                <div key={`meal-${idx}`} className="plant-cell animate-fade-in">
-                  {pType === 'protein' && <TreePlant isNew={meal.isNew} />}
-                  {pType === 'carbs' && <WheatPlant isNew={meal.isNew} />}
-                  {pType === 'sugars' && <MushroomPlant isNew={meal.isNew} />}
-                  {pType === 'fats' && <SucculentPlant isNew={meal.isNew} />}
-                  <span className="plant-label" style={{textTransform: 'capitalize'}}>{meal.type || 'Meal'}</span>
+                <div key={meal.id} className="plant-cell animate-fade-in">
+                  {plantFor(dominantMacro(meal), isNew)}
+                  <span className="plant-label">{meal.name || meal.type || 'Meal'}</span>
                 </div>
               );
             })}
-            
-            {Array.from({length: Math.max(0, 4 - meals.length)}).map((_, idx) => (
+
+            {Array.from({ length: Math.max(0, totalPlots - todayMeals.length) }).map((_, idx) => (
               <div key={`empty-${idx}`} className="plant-cell empty-cell">
                 <div className="soil-plot">
-                   <span className="empty-cell-num">{idx + meals.length + 1}</span>
+                   <span className="empty-cell-num">{idx + todayMeals.length + 1}</span>
                 </div>
                 <span className="plant-label">Empty soil</span>
               </div>
@@ -120,19 +135,19 @@ export default function Home({ meals = [] }) {
 
         {/* Right: Vertical Hydration */}
         <div className="hydration-vertical">
-          <button className="hydro-icon-wrap" onClick={addHydration} aria-label="Add 250 ml">
-            <Droplet size={18} fill="#60A5FA" color="#60A5FA"/>
+          <button className="hydro-icon-wrap" onClick={() => addWater(GLASS_ML)} aria-label="Add 250 ml">
+            <Droplet size={18} fill="var(--color-water)" color="var(--color-water)"/>
           </button>
 
           <div className="hydro-bar-wrapper">
-             <div className="hydro-track" role="progressbar" aria-valuenow={hydration} aria-valuemin="0" aria-valuemax="100" aria-label="Hydration">
-                <div className="hydro-fill" style={{ height: `${hydration}%` }}>
+             <div className="hydro-track" role="progressbar" aria-valuenow={hydrationPct} aria-valuemin="0" aria-valuemax="100" aria-label="Hydration">
+                <div className="hydro-fill" style={{ height: `${hydrationPct}%` }}>
                    <span className="hydro-text-rotate">{hydrationLiters} / {user.targets.hydrationL} L</span>
                 </div>
              </div>
           </div>
 
-          <button className="hydro-icon-wrap" onClick={removeHydration} aria-label="Remove 250 ml">
+          <button className="hydro-icon-wrap" onClick={() => addWater(-GLASS_ML)} aria-label="Remove 250 ml">
             <Droplet size={18} strokeWidth={2.5} color="var(--text-secondary)"/>
           </button>
         </div>
@@ -141,31 +156,20 @@ export default function Home({ meals = [] }) {
       {/* Stats Cards Row */}
       <div className="stats-cards-row mt-8">
         <div className="s-card">
-          <div className="s-card-head"><Flame size={20} color="#FBBF24" /><span>Calories</span></div>
+          <div className="s-card-head"><Flame size={20} color="var(--color-energy)" /><span>Calories</span></div>
           <div className="s-card-val"><strong>{consumedCalories}</strong><span className="s-target">/ {user.targets.calories}</span></div>
-          <div className="s-progress"><div className="s-progress-fill" style={{ width: `${calPct}%`, background: '#FBBF24' }} /></div>
+          <div className="s-progress"><div className="s-progress-fill" style={{ width: `${calPct}%`, background: 'var(--color-energy)' }} /></div>
         </div>
         <div className="s-card">
-          <div className="s-card-head"><Utensils size={20} color="#3B82F6" /><span>Protein</span></div>
+          <div className="s-card-head"><Utensils size={20} color="var(--color-protein)" /><span>Protein</span></div>
           <div className="s-card-val"><strong>{consumedProtein}g</strong><span className="s-target">/ {user.targets.protein}g</span></div>
-          <div className="s-progress"><div className="s-progress-fill" style={{ width: `${protPct}%`, background: '#3B82F6' }} /></div>
+          <div className="s-progress"><div className="s-progress-fill" style={{ width: `${protPct}%`, background: 'var(--color-protein)' }} /></div>
         </div>
         <div className="s-card">
-          <div className="s-card-head"><Smile size={20} color="#A855F7" /><span>Mood</span></div>
+          <div className="s-card-head"><Smile size={20} color="var(--color-mood)" /><span>Mood</span></div>
           <div className="s-card-val"><strong style={{ fontSize: '18px' }}>{topMood}</strong></div>
-          <div className="s-card-sub">{meals.length} meal{meals.length === 1 ? '' : 's'} logged</div>
+          <div className="s-card-sub">{todayMeals.length} meal{todayMeals.length === 1 ? '' : 's'} logged today</div>
         </div>
-      </div>
-
-      {/* Personalized recommendation */}
-      <div className="recommendation-slot mt-8">
-        <Recommendation
-          user={user}
-          consumedCalories={consumedCalories}
-          consumedProtein={consumedProtein}
-          hydrationPct={hydration}
-          onAction={() => navigate('/log')}
-        />
       </div>
 
       {/* Floating Action Button */}
@@ -190,32 +194,29 @@ export default function Home({ meals = [] }) {
               {modalType === 'settings' ? (
                 <div className="settings-menu">
                   <div className="setting-row">
-                    <span>Dark Theme</span>
-                    <input type="checkbox" defaultChecked />
+                    <span>Hydration goal</span>
+                    <span className="setting-val">{user.targets.hydrationL} L · from your weight</span>
                   </div>
                   <div className="setting-row">
-                    <span>Hydration Goal</span>
-                    <span className="setting-val">2.5 L</span>
+                    <span>Calorie target</span>
+                    <span className="setting-val">{user.targets.calories} kcal · from your profile</span>
                   </div>
-                  <div className="setting-row">
-                    <span>Reminders</span>
-                    <input type="checkbox" defaultChecked />
-                  </div>
+                  <Link to="/profile" className="setting-row setting-link" onClick={() => setModalType(null)}>
+                    <span><User size={14} style={{ verticalAlign: '-2px', marginRight: 6 }} />Edit personal data & goals</span>
+                    <span className="setting-val">Profile →</span>
+                  </Link>
+                  <button className="setting-row setting-link setting-logout" onClick={logout}>
+                    <span><LogOut size={14} style={{ verticalAlign: '-2px', marginRight: 6 }} />Log out</span>
+                  </button>
                 </div>
               ) : (
                 <div className="notif-menu">
-                  <div className="notif-item unread">
-                    <span className="notif-time">10m ago</span>
-                    <p>💧 Don't forget to water your garden!</p>
-                  </div>
-                  <div className="notif-item">
-                    <span className="notif-time">2h ago</span>
-                    <p>💪 You hit your protein target for lunch.</p>
-                  </div>
-                  <div className="notif-item">
-                    <span className="notif-time">Yesterday</span>
-                    <p>🌱 A new companion plant grew in your garden.</p>
-                  </div>
+                  {notifications.map((n, i) => (
+                    <div key={i} className={`notif-item ${i === 0 ? 'unread' : ''}`}>
+                      <span className="notif-time">Today</span>
+                      <p>{n.icon} {n.text}</p>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>

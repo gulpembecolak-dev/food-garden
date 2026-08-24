@@ -1,6 +1,6 @@
 .journal {
   background: var(--surface-color);
-  border: 1px solid rgba(255,255,255,0.06);
+  border: 1px solid rgba(37, 49, 33,0.06);
   border-radius: 18px;
   padding: 18px;
   display: flex;
@@ -27,7 +27,7 @@
   height: 10px;
   border-radius: 50%;
   flex-shrink: 0;
-  box-shadow: 0 0 0 3px rgba(255,255,255,0.04);
+  box-shadow: 0 0 0 3px rgba(37, 49, 33,0.04);
 }
 .journal__author-dot.sm {
   width: 8px;
@@ -51,7 +51,7 @@
   height: 32px;
   border-radius: 8px;
   background: var(--surface-highlight);
-  border: 1px solid rgba(255,255,255,0.05);
+  border: 1px solid rgba(37, 49, 33,0.05);
   color: var(--text-secondary);
   display: flex;
   align-items: center;
@@ -68,7 +68,7 @@
 /* Composer */
 .journal__composer {
   background: var(--surface-highlight);
-  border: 1px solid rgba(255,255,255,0.04);
+  border: 1px solid rgba(37, 49, 33,0.04);
   border-radius: 12px;
   padding: 12px;
   display: flex;
@@ -128,7 +128,7 @@
   background: var(--surface-highlight);
   border-radius: 12px;
   padding: 12px 14px 12px 18px;
-  border: 1px solid rgba(255,255,255,0.04);
+  border: 1px solid rgba(37, 49, 33,0.04);
   transition: border-color 0.15s;
 }
 .journal__entry::before {
@@ -141,7 +141,7 @@
   border-radius: 2px;
   background: var(--entry-accent, var(--primary-color));
 }
-.journal__entry:hover { border-color: rgba(255,255,255,0.08); }
+.journal__entry:hover { border-color: rgba(37, 49, 33,0.08); }
 .journal__entry:hover .journal__delete { opacity: 1; }
 
 .journal__entry-meta {
@@ -187,8 +187,8 @@
   font-family: inherit;
 }
 .journal__delete:hover {
-  color: #F87171;
-  background: rgba(248, 113, 113, 0.08);
+  color: #B45446;
+  background: rgba(180, 84, 70, 0.08);
 }
 @media (max-width: 768px) {
   .journal__delete { opacity: 1; }

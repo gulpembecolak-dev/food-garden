@@ -1,50 +1,18 @@
 import { useState, useMemo } from 'react';
 import './Insights.css';
-import { BookOpen } from 'lucide-react';
+import { BookOpen, Sprout } from 'lucide-react';
 import { useUser } from '../context/UserContext';
+import { useMeals, fmtDate } from '../context/MealsContext';
 import JournalDrawer from '../components/JournalDrawer';
 import { useJournal } from '../hooks/useJournal';
 
-const TAB_DATA = {
-  'This Week': {
-    days: ['M','T','W','Th','F','S','Su'],
-    hydration: [40, 65, 55, 80, 70, 90, 75],
-    macroPct: { protein: 0.72, carbs: 0.58, fats: 0.85 },
-    locations: { Home: 60, Campus: 25, Restaurant: 15 },
-    weeklyHealth: ['green-dark','green-light','yellow','yellow','red','red','green-dark'],
-    moodOutcomes: [
-      { id: 'happy',    emoji: '😄', label: 'Happy',    up: 3, steady: 1, down: 0 },
-      { id: 'calm',     emoji: '😌', label: 'Calm',     up: 2, steady: 1, down: 0 },
-      { id: 'tired',    emoji: '😴', label: 'Tired',    up: 1, steady: 2, down: 2 },
-      { id: 'stressed', emoji: '😫', label: 'Stressed', up: 0, steady: 1, down: 3 },
-    ],
-  },
-  'Last 7 Days': {
-    days: ['1','2','3','4','5','6','7'],
-    hydration: [55, 60, 70, 65, 75, 60, 80],
-    macroPct: { protein: 0.84, carbs: 0.66, fats: 0.78 },
-    locations: { Home: 50, Campus: 30, Restaurant: 20 },
-    weeklyHealth: ['green-light','green-dark','green-light','yellow','green-light','green-dark','yellow'],
-    moodOutcomes: [
-      { id: 'happy',    emoji: '😄', label: 'Happy',    up: 4, steady: 1, down: 0 },
-      { id: 'calm',     emoji: '😌', label: 'Calm',     up: 3, steady: 0, down: 0 },
-      { id: 'tired',    emoji: '😴', label: 'Tired',    up: 2, steady: 1, down: 1 },
-      { id: 'stressed', emoji: '😫', label: 'Stressed', up: 1, steady: 1, down: 1 },
-    ],
-  },
-  'This Month': {
-    days: ['W1','W2','W3','W4'],
-    hydration: [60, 70, 65, 78],
-    macroPct: { protein: 0.78, carbs: 0.62, fats: 0.71 },
-    locations: { Home: 55, Campus: 28, Restaurant: 17 },
-    weeklyHealth: ['green-light','yellow','green-dark','green-light','yellow','red','green-light'],
-    moodOutcomes: [
-      { id: 'happy',    emoji: '😄', label: 'Happy',    up: 12, steady: 4, down: 1 },
-      { id: 'calm',     emoji: '😌', label: 'Calm',     up: 8,  steady: 3, down: 1 },
-      { id: 'tired',    emoji: '😴', label: 'Tired',    up: 4,  steady: 5, down: 6 },
-      { id: 'stressed', emoji: '😫', label: 'Stressed', up: 2,  steady: 4, down: 7 },
-    ],
-  },
+const MOOD_META = {
+  happy: { emoji: '😄', label: 'Happy' },
+  calm: { emoji: '😌', label: 'Calm' },
+  excited: { emoji: '🤩', label: 'Excited' },
+  tired: { emoji: '😴', label: 'Tired' },
+  stressed: { emoji: '😫', label: 'Stressed' },
+  angry: { emoji: '😤', label: 'Frustrated' },
 };
 
 const HYDRA_THRESHOLD = { good: 80, mid: 50 };
@@ -52,6 +20,29 @@ function hydraStatus(v) {
   if (v >= HYDRA_THRESHOLD.good) return 'good';
   if (v >= HYDRA_THRESHOLD.mid) return 'mid';
   return 'low';
+}
+
+function dayKeysBack(n) {
+  const keys = [];
+  for (let i = n - 1; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    keys.push(fmtDate(d));
+  }
+  return keys;
+}
+
+function weekKeys() {
+  // Monday of the current week through Sunday
+  const d = new Date();
+  const dow = (d.getDay() + 6) % 7; // Mon=0
+  d.setDate(d.getDate() - dow);
+  const keys = [];
+  for (let i = 0; i < 7; i++) {
+    keys.push(fmtDate(d));
+    d.setDate(d.getDate() + 1);
+  }
+  return keys;
 }
 
 function computeMoodInsight(outcomes) {
@@ -62,6 +53,7 @@ function computeMoodInsight(outcomes) {
   if (enriched.length === 0) return null;
   const best = enriched.reduce((a, b) => a.upPct > b.upPct ? a : b);
   const worst = enriched.reduce((a, b) => a.downPct > b.downPct ? a : b);
+  if (best.id === worst.id) return null;
   return {
     bestLabel: best.label,
     bestEmoji: best.emoji,
@@ -74,51 +66,180 @@ function computeMoodInsight(outcomes) {
 
 export default function Insights() {
   const { user } = useUser();
-  const tabs = Object.keys(TAB_DATA);
+  const { mealsByDate, hydration } = useMeals();
+  const tabs = ['This week', 'This month'];
   const [activeTab, setActiveTab] = useState(tabs[0]);
   const [journalOpen, setJournalOpen] = useState(false);
-  const journal = useJournal(user.id);
-  const data = TAB_DATA[activeTab];
+  const journal = useJournal();
 
-  // Macros: actual consumption vs user targets, derived from this tab
+  const targets = user.targets;
+  const hydrationTargetMl = targets.hydrationL * 1000;
+  const todayStr = fmtDate(new Date());
+
+  // ---- Everything below is computed from logged meals + water ----
+  const data = useMemo(() => {
+    const hydraPctOf = (key) => Math.round(((hydration[key] || 0) / hydrationTargetMl) * 100);
+
+    const dayTotals = (key) => {
+      const meals = mealsByDate[key] || [];
+      return meals.reduce((acc, m) => {
+        acc.calories += m.macros?.calories ?? 0;
+        acc.protein += m.macros?.protein ?? 0;
+        acc.carbs += m.macros?.carbs ?? 0;
+        acc.fats += m.macros?.fats ?? 0;
+        acc.count += 1;
+        return acc;
+      }, { calories: 0, protein: 0, carbs: 0, fats: 0, count: 0 });
+    };
+
+    const dayBalance = (totals) => {
+      if (!totals.count) return null;
+      const pcts = [
+        Math.min(100, (totals.protein / targets.protein) * 100),
+        Math.min(100, (totals.carbs / targets.carbs) * 100),
+        Math.min(100, (totals.fats / targets.fats) * 100),
+      ];
+      return Math.round(pcts.reduce((a, b) => a + b, 0) / pcts.length);
+    };
+
+    const healthOf = (key) => {
+      const totals = dayTotals(key);
+      if (key > todayStr) return 'future';
+      if (!totals.count) return 'empty';
+      const balance = dayBalance(totals);
+      const hydra = hydraPctOf(key);
+      const score = balance * 0.7 + Math.min(100, hydra) * 0.3;
+      if (score >= 75) return 'green-dark';
+      if (score >= 60) return 'green-light';
+      if (score >= 40) return 'yellow';
+      return 'red';
+    };
+
+    let days, keysInRange;
+    if (activeTab === 'This week') {
+      keysInRange = weekKeys();
+      days = keysInRange.map((key, i) => ({
+        key,
+        label: ['M', 'T', 'W', 'Th', 'F', 'S', 'Su'][i],
+        hydration: key > todayStr ? null : hydraPctOf(key),
+        health: healthOf(key),
+      }));
+    } else {
+      // last 28 days, grouped per week
+      const all = dayKeysBack(28);
+      days = [0, 1, 2, 3].map(w => {
+        const chunk = all.slice(w * 7, w * 7 + 7);
+        const pcts = chunk.map(hydraPctOf);
+        const healths = chunk.map(healthOf).filter(h => h !== 'empty' && h !== 'future');
+        const rank = { 'green-dark': 4, 'green-light': 3, 'yellow': 2, 'red': 1 };
+        const avgRank = healths.length
+          ? healths.reduce((a, h) => a + rank[h], 0) / healths.length
+          : null;
+        const health = avgRank == null ? 'empty'
+          : avgRank >= 3.5 ? 'green-dark'
+          : avgRank >= 2.5 ? 'green-light'
+          : avgRank >= 1.5 ? 'yellow'
+          : 'red';
+        return {
+          key: chunk[0],
+          label: `W${w + 1}`,
+          hydration: Math.round(pcts.reduce((a, b) => a + b, 0) / pcts.length),
+          health,
+        };
+      });
+      keysInRange = all;
+    }
+
+    const mealsInRange = keysInRange.flatMap(key => mealsByDate[key] || []);
+    const loggedDays = keysInRange.filter(key => (mealsByDate[key] || []).length > 0);
+
+    // Average intake per logged day vs daily targets
+    const totals = loggedDays.reduce((acc, key) => {
+      const t = dayTotals(key);
+      acc.protein += t.protein; acc.carbs += t.carbs; acc.fats += t.fats;
+      return acc;
+    }, { protein: 0, carbs: 0, fats: 0 });
+    const nDays = Math.max(1, loggedDays.length);
+    const macroPct = {
+      protein: totals.protein / nDays / targets.protein,
+      carbs: totals.carbs / nDays / targets.carbs,
+      fats: totals.fats / nDays / targets.fats,
+    };
+
+    // Locations
+    const locCounts = {};
+    mealsInRange.forEach(m => {
+      if (m.location) locCounts[m.location] = (locCounts[m.location] || 0) + 1;
+    });
+    const locTotal = Object.values(locCounts).reduce((a, b) => a + b, 0);
+    const locations = Object.fromEntries(
+      Object.entries(locCounts)
+        .sort((a, b) => b[1] - a[1])
+        .map(([place, count]) => [place, Math.round((count / locTotal) * 100)])
+    );
+
+    // Mood × energy from logged meals
+    const moodOutcomes = Object.entries(MOOD_META).map(([id, meta]) => {
+      const rows = mealsInRange.filter(m => m.mood === id);
+      return {
+        id, ...meta,
+        up: rows.filter(m => m.energy === 'up').length,
+        steady: rows.filter(m => m.energy === 'steady').length,
+        down: rows.filter(m => m.energy === 'down').length,
+      };
+    }).filter(o => o.up + o.steady + o.down > 0);
+
+    // Most frequent meals — by name when present (example data), else by type
+    const nameCounts = {};
+    mealsInRange.forEach(m => {
+      const n = m.name?.trim() || (m.type ? m.type.charAt(0).toUpperCase() + m.type.slice(1) : null);
+      if (n) nameCounts[n] = (nameCounts[n] || 0) + 1;
+    });
+    const frequentMeals = Object.entries(nameCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3);
+
+    return { days, mealsInRange, loggedDays, macroPct, locations, moodOutcomes, frequentMeals };
+  }, [activeTab, mealsByDate, hydration, hydrationTargetMl, targets, todayStr]);
+
   const macroRows = useMemo(() => {
-    const t = user.targets;
     const items = [
-      { key: 'protein', label: 'Protein', target: t.protein, color: '#3B82F6', unit: 'g' },
-      { key: 'carbs',   label: 'Carbs',   target: t.carbs,   color: '#FBBF24', unit: 'g' },
-      { key: 'fats',    label: 'Fats',    target: t.fats,    color: '#14B8A6', unit: 'g' },
+      { key: 'protein', label: 'Protein', target: targets.protein, color: 'var(--color-protein)', unit: 'g' },
+      { key: 'carbs',   label: 'Carbs',   target: targets.carbs,   color: 'var(--color-carbs)', unit: 'g' },
+      { key: 'fats',    label: 'Fats',    target: targets.fats,    color: 'var(--color-fats)', unit: 'g' },
     ];
     return items.map(it => {
       const pct = data.macroPct[it.key];
       const consumed = Math.round(it.target * pct);
-      const pctRounded = Math.round(pct * 100);
-      return { ...it, consumed, pct: pctRounded };
+      return { ...it, consumed, pct: Math.round(pct * 100) };
     });
-  }, [data, user.targets]);
+  }, [data, targets]);
 
   const balanceScore = useMemo(() => {
     const avg = macroRows.reduce((sum, r) => sum + Math.min(r.pct, 100), 0) / macroRows.length;
     return Math.round(avg);
   }, [macroRows]);
-  const scoreColor = balanceScore >= 80 ? '#4ADE80' : balanceScore >= 65 ? '#FBBF24' : '#F87171';
+  const scoreColor = balanceScore >= 80 ? 'var(--color-success)' : balanceScore >= 65 ? 'var(--color-warning)' : 'var(--color-danger)';
 
-  // Hydration: per-day status, average, best/worst
   const hydra = useMemo(() => {
-    const goalL = user.targets.hydrationL;
-    const dailyL = data.hydration.map(p => Math.round((p / 100) * goalL * 10) / 10);
-    const avgPct = Math.round(data.hydration.reduce((a, b) => a + b, 0) / data.hydration.length);
-    const avgL = Math.round((avgPct / 100) * goalL * 10) / 10;
-    const bestIdx = data.hydration.indexOf(Math.max(...data.hydration));
-    const worstIdx = data.hydration.indexOf(Math.min(...data.hydration));
-    return { goalL, dailyL, avgPct, avgL, bestIdx, worstIdx };
-  }, [data, user.targets.hydrationL]);
+    const measured = data.days.filter(d => d.hydration != null);
+    if (measured.length === 0) return null;
+    const avgPct = Math.round(measured.reduce((a, d) => a + d.hydration, 0) / measured.length);
+    const avgL = Math.round((avgPct / 100) * targets.hydrationL * 10) / 10;
+    const best = measured.reduce((a, d) => d.hydration > a.hydration ? d : a);
+    const worst = measured.reduce((a, d) => d.hydration < a.hydration ? d : a);
+    return { avgPct, avgL, best, worst };
+  }, [data, targets.hydrationL]);
+
+  const hasData = data.mealsInRange.length > 0;
+  const moodInsight = computeMoodInsight(data.moodOutcomes);
 
   return (
     <div className="insights-container animate-fade-in">
       <header className="insights-head">
         <div>
           <h1 className="journal-title">Garden Journal</h1>
-          <p className="journal-sub">Patterns for {user.name} · goal: {user.targets.calories} kcal / {user.targets.hydrationL} L</p>
+          <p className="journal-sub">Patterns for {user.name} · goal: {targets.calories} kcal / {targets.hydrationL} L</p>
         </div>
       </header>
 
@@ -161,12 +282,23 @@ export default function Insights() {
         onRemove={journal.remove}
       />
 
+      {!hasData ? (
+        <div className="insights-empty glass-panel mt-6">
+          <Sprout size={36} />
+          <h3>No meals in this range yet</h3>
+          <p>
+            Log a few meals and the charts on this page grow out of them —
+            nutrition balance, hydration, mood × energy and your eating places.
+          </p>
+        </div>
+      ) : (
+      <>
       <div className="insights-grid mt-6">
         <div className="journal-card">
           <div className="nut-head">
             <div>
               <h3 className="card-heading">Nutrition balance</h3>
-              <span className="card-sub">vs. your daily targets</span>
+              <span className="card-sub">avg per logged day · {data.loggedDays.length} day{data.loggedDays.length === 1 ? '' : 's'}</span>
             </div>
             <div className="nut-score" style={{ '--score-color': scoreColor }}>
               <div className="nut-score-ring">
@@ -197,7 +329,7 @@ export default function Insights() {
               ? 'Strong macro split — keep this pattern.'
               : balanceScore >= 65
               ? 'Decent split. Lift the lowest macro to round it out.'
-              : 'Below baseline. Plan one meal around your gap macro.'}
+              : 'Below your targets. Plan one meal around your gap macro.'}
           </p>
         </div>
 
@@ -205,53 +337,60 @@ export default function Insights() {
           <div className="nut-head">
             <div>
               <h3 className="card-heading">Hydration trend</h3>
-              <span className="card-sub">{hydra.avgL} L avg · {hydra.goalL} L goal</span>
+              <span className="card-sub">{hydra ? `${hydra.avgL} L avg · ${targets.hydrationL} L goal` : `goal ${targets.hydrationL} L`}</span>
             </div>
-            <span className={`hydra-pct ${hydraStatus(hydra.avgPct)}`}>{hydra.avgPct}%</span>
+            {hydra && <span className={`hydra-pct ${hydraStatus(hydra.avgPct)}`}>{hydra.avgPct}%</span>}
           </div>
 
           <div className="hydra-chart">
             <span className="hydra-goal-tick" aria-hidden="true">100%</span>
             <div className="hydra-goal-line" aria-hidden="true" />
             <div className="hydra-bars">
-              {data.days.map((day, i) => {
-                const v = data.hydration[i];
-                const status = hydraStatus(v);
+              {data.days.map((day) => {
+                const v = day.hydration;
+                const status = v == null ? null : hydraStatus(v);
                 return (
                   <div
-                    key={day}
-                    className={`hydra-day ${i === hydra.bestIdx ? 'best' : ''} ${i === hydra.worstIdx ? 'worst' : ''}`}
-                    title={`${day}: ${hydra.dailyL[i]} L (${v}% of goal)`}
+                    key={day.key}
+                    className={`hydra-day ${hydra?.best.key === day.key ? 'best' : ''} ${hydra?.worst.key === day.key ? 'worst' : ''}`}
+                    title={v == null ? `${day.label}: upcoming` : `${day.label}: ${v}% of goal`}
                   >
                     <div className="hydra-bar-track">
-                      <div
-                        className={`hydra-bar-fill ${status}`}
-                        style={{ height: `${Math.min(v, 100)}%` }}
-                        role="img"
-                        aria-label={`${day}: ${v}% of goal`}
-                      />
+                      {v != null && (
+                        <div
+                          className={`hydra-bar-fill ${status}`}
+                          style={{ height: `${Math.min(v, 100)}%` }}
+                          role="img"
+                          aria-label={`${day.label}: ${v}% of goal`}
+                        />
+                      )}
                     </div>
-                    <span className="hydra-day-label">{day}</span>
+                    <span className="hydra-day-label">{day.label}</span>
                   </div>
                 );
               })}
             </div>
           </div>
 
-          <div className="hydra-meta">
-            <span><span className="hydra-dot good" /> Best · {data.days[hydra.bestIdx]} {data.hydration[hydra.bestIdx]}%</span>
-            <span><span className="hydra-dot low" /> Worst · {data.days[hydra.worstIdx]} {data.hydration[hydra.worstIdx]}%</span>
-          </div>
+          {hydra && (
+            <div className="hydra-meta">
+              <span><span className="hydra-dot good" /> Best · {hydra.best.label} {hydra.best.hydration}%</span>
+              <span><span className="hydra-dot low" /> Worst · {hydra.worst.label} {hydra.worst.hydration}%</span>
+            </div>
+          )}
         </div>
 
         <div className="journal-card mood-card-wide">
           <h3 className="card-heading">Mood × energy</h3>
+          {data.moodOutcomes.length === 0 ? (
+            <div className="mood-empty">No mood data logged in this range yet.</div>
+          ) : (
           <ul className="mood-rows">
             {data.moodOutcomes.map(m => {
               const total = m.up + m.steady + m.down;
-              const upPct = total ? (m.up / total) * 100 : 0;
-              const steadyPct = total ? (m.steady / total) * 100 : 0;
-              const downPct = total ? (m.down / total) * 100 : 0;
+              const upPct = (m.up / total) * 100;
+              const steadyPct = (m.steady / total) * 100;
+              const downPct = (m.down / total) * 100;
               return (
                 <li key={m.id} className="mood-row">
                   <div className="mood-row-head">
@@ -259,28 +398,21 @@ export default function Insights() {
                     <span className="mood-row-label">{m.label}</span>
                     <span className="mood-row-count">{total}</span>
                   </div>
-                  {total > 0 ? (
-                    <div className="mood-stack" role="img" aria-label={`${m.up} energy up, ${m.steady} steady, ${m.down} down`}>
-                      {upPct > 0 && <span className="mood-seg up" style={{ width: `${upPct}%` }} />}
-                      {steadyPct > 0 && <span className="mood-seg steady" style={{ width: `${steadyPct}%` }} />}
-                      {downPct > 0 && <span className="mood-seg down" style={{ width: `${downPct}%` }} />}
-                    </div>
-                  ) : (
-                    <div className="mood-empty">No meals logged</div>
-                  )}
+                  <div className="mood-stack" role="img" aria-label={`${m.up} energized, ${m.steady} steady, ${m.down} sluggish`}>
+                    {upPct > 0 && <span className="mood-seg up" style={{ width: `${upPct}%` }} />}
+                    {steadyPct > 0 && <span className="mood-seg steady" style={{ width: `${steadyPct}%` }} />}
+                    {downPct > 0 && <span className="mood-seg down" style={{ width: `${downPct}%` }} />}
+                  </div>
                 </li>
               );
             })}
           </ul>
-          {(() => {
-            const insight = computeMoodInsight(data.moodOutcomes);
-            if (!insight) return null;
-            return (
-              <p className="mood-insight">
-                Energy peaks on <strong>{insight.bestEmoji} {insight.bestLabel.toLowerCase()}</strong> meals ({insight.bestPct}% ↑) · slumps on <strong>{insight.worstEmoji} {insight.worstLabel.toLowerCase()}</strong> ({insight.worstPct}% ↓).
-              </p>
-            );
-          })()}
+          )}
+          {moodInsight && (
+            <p className="mood-insight">
+              Energy peaks on <strong>{moodInsight.bestEmoji} {moodInsight.bestLabel.toLowerCase()}</strong> meals ({moodInsight.bestPct}% ↑) · slumps on <strong>{moodInsight.worstEmoji} {moodInsight.worstLabel.toLowerCase()}</strong> ({moodInsight.worstPct}% ↓).
+            </p>
+          )}
         </div>
       </div>
 
@@ -288,11 +420,15 @@ export default function Insights() {
       <div className="pattern-grid">
         <div className="glass-panel p-card">
           <h3 className="card-heading mb-4">Most frequent meals</h3>
-          <ul className="meal-list">
-            <li><span className="emoji-icon">🥗</span> Quinoa Salad (4×)</li>
-            <li><span className="emoji-icon">☕</span> Coffee (6×)</li>
-            <li><span className="emoji-icon">🍞</span> Avocado Toast (3×)</li>
-          </ul>
+          {data.frequentMeals.length === 0 ? (
+            <div className="mood-empty">Your repeated meals show up here.</div>
+          ) : (
+            <ul className="meal-list">
+              {data.frequentMeals.map(([mealName, count]) => (
+                <li key={mealName}><span className="emoji-icon">🍽</span> {mealName} ({count}×)</li>
+              ))}
+            </ul>
+          )}
         </div>
 
         <div className="glass-panel p-card">
@@ -310,22 +446,25 @@ export default function Insights() {
       </div>
 
       <div className="glass-panel p-card mt-4">
-        <h3 className="card-heading mb-3">Weekly garden health</h3>
+        <h3 className="card-heading mb-3">{activeTab === 'This week' ? 'Daily garden health' : 'Weekly garden health'}</h3>
         <div className="garden-health-row">
            <div className="gh-days">
-             {data.weeklyHealth.map((status, i) => (
-               <div className="gh-col" key={i}>
-                 <span className="gh-lbl">{['M','T','W','Th','F','S','Su'][i]}</span>
-                 <div className={`gh-box ${status}`}></div>
+             {data.days.map((day) => (
+               <div className="gh-col" key={day.key}>
+                 <span className="gh-lbl">{day.label}</span>
+                 <div className={`gh-box ${day.health}`} title={day.health === 'empty' ? 'No meals logged' : day.health === 'future' ? 'Upcoming' : undefined}></div>
                </div>
              ))}
            </div>
            <div className="gh-legend text-xs">
-              <div><span className="dot-sm green-dark"></span> healthy <span className="dot-sm yellow"></span> moderate <span className="dot-sm red"></span> poor</div>
-              <div className="text-secondary">(low hydration, poor food choices)</div>
+              <div><span className="dot-sm green-dark"></span> on target <span className="dot-sm yellow"></span> partial <span className="dot-sm red"></span> off target</div>
+              <div className="text-secondary">macro balance (70%) + hydration (30%) vs. your own targets</div>
            </div>
         </div>
       </div>
+
+      </>
+      )}
 
     </div>
   );

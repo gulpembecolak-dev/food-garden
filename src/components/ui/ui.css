@@ -1,16 +1,16 @@
 /* === Card === */
 .ui-card {
   background: var(--surface-color);
-  border: 1px solid rgba(255,255,255,0.05);
+  border: 1px solid rgba(37, 49, 33,0.05);
   border-radius: 18px;
 }
 .ui-card--glass {
-  background: rgba(30, 41, 59, 0.6);
+  background: rgba(250, 248, 240, 0.7);
   backdrop-filter: blur(12px);
 }
 .ui-card--accent {
-  background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(16,185,129,0.05));
-  border-color: rgba(16,185,129,0.3);
+  background: linear-gradient(135deg, rgba(57,121,60,0.15), rgba(57,121,60,0.05));
+  border-color: rgba(57,121,60,0.3);
 }
 .ui-card--p-sm { padding: 14px; }
 .ui-card--p-md { padding: 20px; }
@@ -56,36 +56,36 @@
 
 .ui-btn--primary {
   background: var(--primary-color);
-  color: #062a1f;
+  color: #10240F;
 }
 .ui-btn--primary:hover { background: var(--primary-hover); }
 
 .ui-btn--secondary {
   background: var(--surface-highlight);
   color: var(--text-primary);
-  border-color: rgba(255,255,255,0.06);
+  border-color: rgba(37, 49, 33,0.06);
 }
-.ui-btn--secondary:hover { background: rgba(255,255,255,0.06); }
+.ui-btn--secondary:hover { background: rgba(37, 49, 33,0.06); }
 
 .ui-btn--ghost {
   background: transparent;
   color: var(--text-secondary);
 }
-.ui-btn--ghost:hover { color: var(--text-primary); background: rgba(255,255,255,0.04); }
+.ui-btn--ghost:hover { color: var(--text-primary); background: rgba(37, 49, 33,0.04); }
 
 .ui-btn--outline {
   background: transparent;
   color: var(--primary-color);
   border-color: var(--primary-color);
 }
-.ui-btn--outline:hover { background: rgba(16,185,129,0.1); }
+.ui-btn--outline:hover { background: rgba(57,121,60,0.1); }
 
 .ui-btn__icon { display: inline-flex; align-items: center; }
 
 /* === Stat === */
 .ui-stat {
   background: var(--surface-color);
-  border: 1px solid rgba(255,255,255,0.05);
+  border: 1px solid rgba(37, 49, 33,0.05);
   border-radius: 16px;
   padding: 16px;
   display: flex;
@@ -134,7 +134,7 @@
   align-items: center;
   padding: 8px 14px;
   background: var(--surface-color);
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid rgba(37, 49, 33,0.08);
   border-radius: 999px;
   color: var(--text-secondary);
   font-size: 13px;
@@ -151,7 +151,7 @@
   height: 36px;
   align-items: center;
   justify-content: center;
-  background: rgba(255,255,255,0.06);
+  background: rgba(37, 49, 33,0.06);
   border-radius: 50%;
 }
 .rec-body {

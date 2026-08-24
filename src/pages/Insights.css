@@ -71,7 +71,7 @@
   align-items: center;
   gap: 12px;
   margin-top: 12px;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
+  border-bottom: 1px solid rgba(37, 49, 33,0.05);
 }
 .insights-toolbar .tabs-scroll-container {
   flex: 1;
@@ -93,7 +93,7 @@
   margin: 0 -24px;
   padding: 0 24px;
   overflow-x: auto;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
+  border-bottom: 1px solid rgba(37, 49, 33,0.05);
 }
 
 .tabs-scroll-container::-webkit-scrollbar {
@@ -302,9 +302,9 @@
   font-variant-numeric: tabular-nums;
   flex-shrink: 0;
 }
-.hydra-pct.good { background: rgba(74, 222, 128, 0.15); color: var(--color-success); }
-.hydra-pct.mid  { background: rgba(251, 191, 36, 0.15); color: var(--color-warning); }
-.hydra-pct.low  { background: rgba(248, 113, 113, 0.15); color: var(--color-danger); }
+.hydra-pct.good { background: rgba(70, 133, 74, 0.15); color: var(--color-success); }
+.hydra-pct.mid  { background: rgba(196, 144, 8, 0.15); color: var(--color-warning); }
+.hydra-pct.low  { background: rgba(180, 84, 70, 0.15); color: var(--color-danger); }
 
 .hydra-chart {
   position: relative;
@@ -323,7 +323,7 @@
   left: 0;
   right: 24px;
   top: 4px;
-  border-top: 1px dashed rgba(255,255,255,0.15);
+  border-top: 1px dashed rgba(37, 49, 33,0.15);
 }
 
 .hydra-bars {
@@ -359,11 +359,11 @@
   border-radius: 999px;
   transition: height 0.5s ease;
 }
-.hydra-bar-fill.good { background: linear-gradient(180deg, #60A5FA 0%, #3B82F6 100%); }
+.hydra-bar-fill.good { background: linear-gradient(180deg, #8FAEC9 0%, #6E93B4 100%); }
 .hydra-bar-fill.mid  { background: linear-gradient(180deg, var(--color-warning) 0%, #D97706 100%); }
 .hydra-bar-fill.low  { background: linear-gradient(180deg, var(--color-danger) 0%, #DC2626 100%); }
 
-.hydra-day.best .hydra-bar-track { box-shadow: 0 0 0 1.5px rgba(96, 165, 250, 0.4); }
+.hydra-day.best .hydra-bar-track { box-shadow: 0 0 0 1.5px rgba(110, 147, 180, 0.4); }
 
 .hydra-day-label {
   font-size: 10px;
@@ -381,7 +381,7 @@
   gap: 8px;
   margin-top: 14px;
   padding-top: 12px;
-  border-top: 1px solid rgba(255,255,255,0.05);
+  border-top: 1px solid rgba(37, 49, 33,0.05);
   font-size: 11px;
   color: var(--text-secondary);
 }
@@ -396,7 +396,7 @@
   border-radius: 50%;
   display: inline-block;
 }
-.hydra-dot.good { background: #60A5FA; }
+.hydra-dot.good { background: #6E93B4; }
 .hydra-dot.low  { background: var(--color-danger); }
 
 /* === Mood × Energy infographic === */
@@ -461,7 +461,7 @@
 .mood-insight {
   margin-top: 18px;
   padding-top: 14px;
-  border-top: 1px solid rgba(255,255,255,0.05);
+  border-top: 1px solid rgba(37, 49, 33,0.05);
   font-size: 12px;
   color: var(--text-secondary);
   line-height: 1.6;
@@ -564,7 +564,7 @@
   color: var(--text-secondary);
   padding-right: 8px;
   position: relative;
-  border-right: 1px solid rgba(255,255,255,0.1);
+  border-right: 1px solid rgba(37, 49, 33,0.1);
 }
 
 .axis-label-y {
@@ -587,7 +587,7 @@
   top: 50%;
   left: 0;
   right: 0;
-  border-top: 1px dashed rgba(255,255,255,0.2);
+  border-top: 1px dashed rgba(37, 49, 33,0.2);
 }
 
 .s-dot {
@@ -665,10 +665,17 @@
   border-radius: 6px;
 }
 
-.gh-box.green-dark { background-color: #15803D; }
+.gh-box.green-dark { background-color: #2F6532; }
 .gh-box.green-light { background-color: var(--color-success); }
-.gh-box.yellow { background-color: #FDE047; }
-.gh-box.red { background-color: #EF4444; }
+.gh-box.yellow { background-color: var(--color-warning); }
+.gh-box.red { background-color: var(--color-danger); }
+.gh-box.empty {
+  background-color: transparent;
+  border: 1.5px dashed rgba(203, 183, 166, 0.35);
+}
+.gh-box.future {
+  background-color: rgba(203, 183, 166, 0.08);
+}
 
 .gh-legend {
   display: flex;
@@ -686,10 +693,25 @@
   vertical-align: middle;
 }
 
-.dot-sm.green-dark { background-color: #15803D; }
-.dot-sm.yellow { background-color: #FDE047; }
-.dot-sm.red { background-color: #EF4444; }
+.dot-sm.green-dark { background-color: #2F6532; }
+.dot-sm.yellow { background-color: #C09A06; }
+.dot-sm.red { background-color: #B45446; }
 
 .text-xs { font-size: 10px; }
 .text-secondary { color: var(--text-secondary); }
+
+
+/* Empty state when no meals fall inside the selected range */
+.insights-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+  padding: 48px 28px;
+  color: var(--text-secondary);
+}
+.insights-empty svg { color: var(--primary-color); }
+.insights-empty h3 { font-size: 17px; color: var(--text-primary); }
+.insights-empty p { font-size: 13px; line-height: 1.6; max-width: 380px; }
 

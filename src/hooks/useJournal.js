@@ -11,14 +11,12 @@ function load() {
   }
 }
 
-export function useJournal(userId) {
+export function useJournal() {
   const [entries, setEntries] = useState(load);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
   }, [entries]);
-
-  const userEntries = entries.filter(e => e.authorId === userId);
 
   const add = (data) => {
     const entry = {
@@ -31,5 +29,5 @@ export function useJournal(userId) {
 
   const remove = (id) => setEntries(prev => prev.filter(e => e.id !== id));
 
-  return { entries: userEntries, add, remove };
+  return { entries, add, remove };
 }

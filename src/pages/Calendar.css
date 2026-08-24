@@ -19,7 +19,7 @@
   height: 38px;
   border-radius: 50%;
   background: var(--surface-color);
-  border: 1px solid rgba(255,255,255,0.05);
+  border: 1px solid rgba(37, 49, 33,0.05);
   color: var(--text-secondary);
   display: flex;
   align-items: center;
@@ -59,7 +59,7 @@
 .cal-day:hover { background: var(--surface-color); }
 .cal-day.active {
   background: var(--surface-color);
-  border-color: rgba(16,185,129,0.25);
+  border-color: rgba(57,121,60,0.25);
   box-shadow: 0 6px 18px rgba(0,0,0,0.25);
 }
 
@@ -83,7 +83,7 @@
 .cal-overview {
   margin-top: 28px;
   background: var(--surface-color);
-  border: 1px solid rgba(255,255,255,0.05);
+  border: 1px solid rgba(37, 49, 33,0.05);
   border-radius: 18px;
   padding: 24px;
 }
@@ -116,9 +116,9 @@
   font-variant-numeric: tabular-nums;
   flex-shrink: 0;
 }
-.cal-hydra-badge.lush { background: rgba(96, 165, 250, 0.15); color: var(--color-info); }
-.cal-hydra-badge.ok { background: rgba(251, 191, 36, 0.12); color: var(--color-warning); }
-.cal-hydra-badge.dry { background: rgba(248, 113, 113, 0.15); color: var(--color-danger); }
+.cal-hydra-badge.lush { background: rgba(110, 147, 180, 0.15); color: var(--color-info); }
+.cal-hydra-badge.ok { background: rgba(196, 144, 8, 0.12); color: var(--color-warning); }
+.cal-hydra-badge.dry { background: rgba(180, 84, 70, 0.15); color: var(--color-danger); }
 .cal-hydra-emoji { font-size: 14px; }
 
 .cal-garden-caption {
@@ -138,9 +138,10 @@
   perspective-origin: center 25%;
   border-radius: 18px;
   overflow: hidden;
+  /* Night sky: Deep Indigo (Sanzo 182) fading into the soil-dark ground */
   background:
-    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(96, 165, 250, 0.06) 0%, transparent 70%),
-    linear-gradient(180deg, #15161c 0%, #0a0b10 100%);
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(110, 147, 180, 0.05) 0%, transparent 70%),
+    linear-gradient(180deg, var(--night-sky) 0%, #101a10 100%);
 }
 
 .cal-garden-sky {
@@ -149,7 +150,7 @@
   left: 0;
   right: 0;
   height: 60px;
-  background: radial-gradient(ellipse at 50% 100%, rgba(251, 191, 36, 0.08) 0%, transparent 70%);
+  background: radial-gradient(ellipse at 50% 100%, rgba(196, 144, 8, 0.08) 0%, transparent 70%);
   pointer-events: none;
 }
 
@@ -194,7 +195,7 @@
   width: 50%;
   height: 50%;
   border-radius: 50%;
-  border: 1.5px dashed rgba(148, 163, 184, 0.18);
+  border: 1.5px dashed rgba(203, 183, 166, 0.18);
   background: rgba(0, 0, 0, 0.2);
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
 }
@@ -229,14 +230,14 @@
 /* FUTURE — neutral, no weather, no state */
 .cal-garden-stage.state-future .cal-garden-grid {
   background:
-    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(rgba(37, 49, 33, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(37, 49, 33, 0.04) 1px, transparent 1px),
     linear-gradient(180deg, #1c1d24 0%, #14151a 70%, #0d0e12 100%);
   background-size: 20% 33.33%, 20% 33.33%, 100% 100%;
 }
 .cal-garden-stage.state-future .cal-garden-sky { display: none; }
 .cal-garden-stage.state-future .cal-cell.empty .cal-empty-soil {
-  border-color: rgba(148, 163, 184, 0.12);
+  border-color: rgba(203, 183, 166, 0.12);
 }
 
 /* OK / steady — default, no override */
@@ -250,7 +251,7 @@
   background-size: 20% 33.33%, 20% 33.33%, 100% 100%;
 }
 .cal-garden-stage.state-dry .cal-garden-sky {
-  background: radial-gradient(ellipse at 50% 100%, rgba(248, 113, 113, 0.12) 0%, transparent 70%);
+  background: radial-gradient(ellipse at 50% 100%, rgba(180, 84, 70, 0.12) 0%, transparent 70%);
 }
 .cal-garden-stage.state-dry .cal-cell-plant {
   filter: saturate(0.35) brightness(0.78) sepia(0.45) hue-rotate(-15deg);
@@ -275,7 +276,7 @@
 
 /* LUSH — vibrant, mist of life */
 .cal-garden-stage.state-lush .cal-garden-sky {
-  background: radial-gradient(ellipse at 50% 100%, rgba(96, 165, 250, 0.16) 0%, transparent 70%);
+  background: radial-gradient(ellipse at 50% 100%, rgba(110, 147, 180, 0.16) 0%, transparent 70%);
 }
 .cal-garden-stage.state-lush .cal-garden-grid {
   background:
@@ -285,18 +286,18 @@
   background-size: 20% 33.33%, 20% 33.33%, 100% 100%;
   box-shadow:
     inset 0 8px 18px rgba(0, 0, 0, 0.4),
-    0 0 0 1px rgba(96, 165, 250, 0.06),
+    0 0 0 1px rgba(110, 147, 180, 0.06),
     0 24px 40px rgba(0, 0, 0, 0.45);
 }
 .cal-garden-stage.state-lush .cal-cell-plant {
-  filter: saturate(1.2) brightness(1.05) drop-shadow(0 0 6px rgba(96, 165, 250, 0.18));
+  filter: saturate(1.2) brightness(1.05) drop-shadow(0 0 6px rgba(110, 147, 180, 0.18));
 }
 
 /* === Meals list === */
 .cal-meals {
   margin-top: 24px;
   background: var(--surface-color);
-  border: 1px solid rgba(255,255,255,0.05);
+  border: 1px solid rgba(37, 49, 33,0.05);
   border-radius: 18px;
   overflow: hidden;
 }
@@ -311,7 +312,7 @@
   align-items: center;
   gap: 16px;
   padding: 16px 20px;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
+  border-bottom: 1px solid rgba(37, 49, 33,0.05);
 }
 .cal-meal:last-child { border-bottom: none; }
 .cal-meal-img {
@@ -372,4 +373,272 @@
 .cal-empty-state span {
   color: var(--text-secondary);
   font-size: 12px;
+}
+
+
+/* Captions inside the dark night stage need light ink regardless of theme */
+.cal-garden-stage .cal-garden-caption { color: #C9CfBE; }
+
+/* ================================================================
+   Weekly garden bed — light paper version (replaces the dark stage)
+   7 columns = days of the week, veggies stand on their day's mound.
+   ================================================================ */
+.cal-bed {
+  margin-top: 22px;
+  border-radius: 16px;
+  background: #EAE0C8; /* light soil paper */
+  border: 1px solid rgba(37, 49, 33, 0.08);
+  padding: 20px 12px 14px;
+}
+
+.cal-bed-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  align-items: end;
+}
+
+.cal-bed-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+
+.cal-bed-plants {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 3px;
+  min-height: 64px;
+}
+.cal-bed-plants img {
+  max-height: 30px;
+  max-width: 34px;
+  object-fit: contain;
+}
+.cal-bed-more {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.cal-bed-mound {
+  width: 30px;
+  height: 9px;
+  border-radius: 50%;
+  background: #B49A6A; /* turned soil */
+}
+.cal-bed-mound.empty {
+  background: transparent;
+  border: 1.5px dashed rgba(37, 49, 33, 0.22);
+}
+
+.cal-bed-day {
+  font-size: 9.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+}
+
+.cal-bed-caption {
+  text-align: center;
+  margin-top: 14px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+/* hydration moods on the light bed */
+.cal-bed.bed-dry { background: #E9D9B8; }
+.cal-bed.bed-dry .cal-bed-plants img { filter: saturate(0.45) sepia(0.25) brightness(0.95); }
+.cal-bed.bed-lush { background: #E2E4C6; }
+.cal-bed.bed-future { opacity: 0.75; }
+
+/* ── Meal delete button ── */
+.cal-meal {
+  position: relative;
+}
+.cal-meal-delete {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  color: var(--text-secondary);
+  opacity: 0;
+  transition: opacity 0.2s ease, background 0.2s ease, color 0.15s ease;
+}
+.cal-meal:hover .cal-meal-delete,
+.cal-meal:focus-within .cal-meal-delete {
+  opacity: 1;
+}
+.cal-meal-delete:hover {
+  background: rgba(180, 84, 70, 0.12);
+  color: var(--color-danger);
+}
+
+
+/* ── Interactive Garden Bed Columns ── */
+button.cal-bed-col {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px 2px;
+  border-radius: 12px;
+  transition: transform 0.18s ease, background-color 0.18s ease;
+  font-family: inherit;
+  outline: none;
+  width: 100%;
+}
+
+button.cal-bed-col:hover {
+  background-color: transparent;
+  transform: translateY(-2px);
+}
+
+button.cal-bed-col.active {
+  background-color: transparent;
+  box-shadow: none;
+}
+
+button.cal-bed-col:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+.cal-bed-mound.active {
+  background: var(--primary-color);
+  box-shadow: 0 2px 8px rgba(57, 121, 60, 0.4);
+}
+
+.cal-bed-day.active {
+  color: var(--primary-color);
+  font-weight: 800;
+}
+
+/* ── Selected Day Summary Card ── */
+.cal-day-summary-card {
+  background: var(--surface-color);
+  border: 1px solid rgba(37, 49, 33, 0.08);
+  border-radius: var(--radius-lg);
+  padding: 16px 18px;
+  margin-bottom: 18px;
+  box-shadow: 0 2px 12px rgba(37, 49, 33, 0.03);
+}
+
+.cal-day-summary-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.cal-day-summary-tag {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--primary-color);
+}
+
+.cal-day-summary-date {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-top: 2px;
+}
+
+.cal-day-summary-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(37, 49, 33, 0.06);
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.cal-day-stats-grid {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(37, 49, 33, 0.06);
+}
+
+.cal-stat-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-color);
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+}
+
+.cal-stat-icon.kcal {
+  color: var(--color-energy);
+}
+.cal-stat-icon.water {
+  color: var(--color-water);
+}
+
+.cal-stat-text {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  font-size: 13px;
+}
+.cal-stat-text strong {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.cal-stat-text span {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.cal-macro-chips {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.macro-chip {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+}
+.macro-chip.protein {
+  background: rgba(82, 113, 119, 0.14);
+  color: var(--color-protein);
+}
+.macro-chip.carbs {
+  background: rgba(196, 144, 8, 0.14);
+  color: var(--color-carbs);
+}
+.macro-chip.fats {
+  background: rgba(132, 146, 94, 0.18);
+  color: var(--color-fats);
+}
+
+@media (max-width: 480px) {
+  .cal-macro-chips {
+    margin-left: 0;
+    width: 100%;
+    justify-content: flex-start;
+  }
 }

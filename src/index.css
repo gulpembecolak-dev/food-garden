@@ -1,31 +1,44 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
 
 :root {
-  /* Premium Dark Mode Palette */
-  --bg-color: #111216; /* Deep dark blue/black for night garden vibe */
-  --surface-color: #1A1B22; /* Card background */
-  --surface-highlight: #2A2D35; /* Raised elements */
-  
+  /* ------------------------------------------------------------------
+     Brand palette — Sanzo Wada, "A Dictionary of Color Combinations",
+     Combination 348 (p.259): Deep Slate Olive, Cossack Green, Olive, Fawn.
+     Night sky borrows Deep Indigo from Combination 182 (p.120).
+     ------------------------------------------------------------------ */
+  /* Light "almanac" reading of 348: the dark surfaces flip into ink,
+     cream paper dominates so the green can breathe as the single accent. */
+  --bg-color: #F1EDE0; /* bone paper — light derivative of Fawn */
+  --surface-color: #FAF8F0; /* raised paper cards */
+  --surface-highlight: #E6E1D0; /* pressed / track surfaces */
+
   /* Typography Colors */
-  --text-primary: #F8FAFC;
-  --text-secondary: #94A3B8;
-  
+  --text-primary: #253121; /* Deep Slate Olive — Sanzo 348, now the ink */
+  --text-secondary: #7A7361; /* muted olive-brown, derived */
+  --text-soft: #D6B8AA; /* Fawn — Sanzo 348, soft fills & tints */
+
   /* Brand / Action Colors */
-  --primary-color: #10B981; /* Emerald green */
-  --primary-hover: #059669;
+  --primary-color: #39793C; /* Cossack Green — Sanzo 348, the single loud voice */
+  --primary-hover: #2F6532;
+  --accent-olive: #8A8520; /* Olive — Sanzo 348, badges & highlights */
+  --night-sky: #001231; /* Deep Indigo — Sanzo 182, garden night sky */
 
-  /* Semantic feedback colors (use for charts, statuses, indicators) */
-  --color-success: #4ADE80;
-  --color-warning: #FBBF24;
-  --color-danger: #F87171;
-  --color-info: #60A5FA;
-  --color-water: #3B82F6;
+  /* Semantic feedback colors (muted into the same printed world) */
+  --color-success: #46854A; /* muted leaf green */
+  --color-warning: #C09A06; /* deep straw — readable on cream, distinct from carbs khaki */
+  --color-danger: #B45446;  /* Ocher Red — Sanzo Comb. 199 (p.129) */
+  --color-info: #6E93B4;    /* slate info blue, shared with water */
 
-  /* Macros & Meaning Colors */
-  --color-carbs: #FBBF24; /* Golden (wheat/rice) */
-  --color-protein: #3B82F6; /* Blue (strength) */
-  --color-fats: #14B8A6; /* Teal (lush succulent) */
-  --color-sugars: #F43F5E; /* Red (striking mushroom) */
+  /* Data colors — ONE color per meaning, used identically in every chart,
+     slider, plant and stat card. All drawn from the same Sanzo dictionary
+     so data reads as printed ink, not digital stickers. */
+  --color-protein: #527177; /* Dark Medici Blue — Comb. 160 (p.109) — peas */
+  --color-carbs: #C49008;   /* Khaki — Comb. 146 (p.102) — carrot */
+  --color-fats: #84925E;    /* Rainette Green — Comb. 73 (p.64) — cucumber */
+  --color-sugars: #784244;  /* Victoria Lake — Comb. 290 (p.201) — beet */
+  --color-energy: #C37608;  /* Raw Sienna — Comb. 182 (p.120) — total calories */
+  --color-water: #6E93B4;   /* derived slate water blue (no fitting blue in the book) */
+  --color-mood: #72737C;    /* Deep Violet/Plumbeous — Comb. 192 (p.125) — mood */
   
   /* Layout */
   --radius-sm: 8px;
@@ -83,9 +96,9 @@ button {
 }
 
 .glass-panel {
-  background: rgba(30, 41, 59, 0.7);
+  background: rgba(250, 248, 240, 0.75);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(37, 49, 33, 0.1);
   border-radius: var(--radius-lg);
 }
 
@@ -137,4 +150,38 @@ button {
   outline: 2px solid var(--primary-color);
   outline-offset: 2px;
   border-radius: 4px;
+}
+
+/* Garden plants as cut-paper veggies (shared by Home, LogMeal, Calendar) */
+.veggie-plant {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  height: 80px;
+  position: relative;
+}
+.veggie-plant img {
+  max-height: 64px;
+  max-width: 64px;
+  object-fit: contain;
+  position: relative;
+  z-index: 1;
+}
+.veggie-plant .veggie-soil {
+  width: 44px;
+  height: 11px;
+  border-radius: 50%;
+  background: #6B5138;
+  margin-top: -5px;
+}
+
+/* freshly planted: pop out of the soil */
+@keyframes veggiePop {
+  0% { transform: translateY(14px) scale(0.2); opacity: 0; }
+  60% { transform: translateY(-4px) scale(1.12); opacity: 1; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+.veggie-plant.is-new img {
+  animation: veggiePop 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }

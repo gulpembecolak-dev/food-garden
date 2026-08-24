@@ -4,7 +4,7 @@ import { useUser } from '../context/UserContext';
 import './SideNav.css';
 
 export default function SideNav() {
-  const { user, activeId, setActiveId, profileIds } = useUser();
+  const { user } = useUser();
 
   return (
     <aside className="side-nav" aria-label="Primary">
@@ -14,20 +14,6 @@ export default function SideNav() {
           <strong>Food Garden</strong>
           <span>Health dashboard</span>
         </div>
-      </div>
-
-      <div className="side-profile-switcher" role="tablist" aria-label="Switch profile">
-        {profileIds.map(id => (
-          <button
-            key={id}
-            role="tab"
-            aria-selected={activeId === id}
-            className={`side-profile-pill ${activeId === id ? 'active' : ''}`}
-            onClick={() => setActiveId(id)}
-          >
-            {id.charAt(0).toUpperCase() + id.slice(1)}
-          </button>
-        ))}
       </div>
 
       <nav className="side-links">
@@ -46,7 +32,13 @@ export default function SideNav() {
       </nav>
 
       <div className="side-user-card" style={{ borderColor: user.accent + '55' }}>
-        <div className="side-user-avatar" style={{ background: user.accent }}>{user.initials}</div>
+        {user.avatar ? (
+          <div className="side-user-avatar side-user-avatar--veggie">
+            <img src={`/veggies/${user.avatar}.png`} alt="" />
+          </div>
+        ) : (
+          <div className="side-user-avatar" style={{ background: user.accent }}>{user.initials}</div>
+        )}
         <div className="side-user-meta">
           <strong>{user.name}</strong>
           <span>{user.targets.calories} kcal · {user.targets.hydrationL} L target</span>

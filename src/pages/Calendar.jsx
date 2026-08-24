@@ -1,43 +1,16 @@
-import { useState, useMemo } from 'react';
-import { ChevronLeft, ChevronRight, Sprout } from 'lucide-react';
+import { useState, useMemo, useRef } from 'react';
+import { ChevronLeft, ChevronRight, Sprout, Trash2, Droplets, Flame, Utensils } from 'lucide-react';
 import { TreePlant, MushroomPlant, WheatPlant, SucculentPlant } from '../components/Plants';
+import { SunGlyph, RainGlyph, CactusGlyph } from '../components/WeatherGlyphs';
+import { useUser } from '../context/UserContext';
+import { useMeals, dominantMacro, fmtDate } from '../context/MealsContext';
 import './Calendar.css';
 
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const DAY_LABELS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 
-const SAMPLE_MEALS = {
-  '2026-05-01': [
-    { id: 's1', name: 'Greek Yoghurt Bowl', desc: 'Protein-packed start with berries and seeds.', macroType: 'protein', img: 'https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&q=80&w=200' },
-    { id: 's2', name: 'Grilled Salmon Plate', desc: 'Salmon with quinoa and roasted asparagus.', macroType: 'protein', img: 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?auto=format&fit=crop&q=80&w=200' },
-  ],
-  '2026-05-02': [
-    { id: 's3', name: 'Avocado Toast', desc: 'Sourdough with avocado, lime and chili flakes.', macroType: 'carbs', img: 'https://images.unsplash.com/photo-1541519227354-08fa5d50c44d?auto=format&fit=crop&q=80&w=200' },
-    { id: 's4', name: 'Pasta Primavera', desc: 'Whole-wheat pasta with seasonal vegetables.', macroType: 'carbs', img: 'https://images.unsplash.com/photo-1473093295043-cdd812d0e601?auto=format&fit=crop&q=80&w=200' },
-    { id: 's5', name: 'Dark Chocolate Square', desc: 'A small treat after dinner.', macroType: 'sugars', img: 'https://images.unsplash.com/photo-1606312619070-d48b4c652a52?auto=format&fit=crop&q=80&w=200' },
-  ],
-  '2026-05-03': [
-    { id: 's6', name: 'Egg White Omelette', desc: 'Spinach, mushrooms, and a touch of feta.', macroType: 'protein', img: 'https://images.unsplash.com/photo-1565895405225-31a1f3ed4cdb?auto=format&fit=crop&q=80&w=200' },
-  ],
-  '2026-05-04': [
-    { id: 's7', name: 'Quinoa Salad with Roasted Veg', desc: 'Quinoa, roasted vegetables, and a lemon dressing.', macroType: 'carbs', img: 'https://images.unsplash.com/photo-1505253716362-afaea1d3d1af?auto=format&fit=crop&q=80&w=200' },
-    { id: 's8', name: 'Seafood Bowl', desc: 'Mixed seafood, brown rice and roasted veggies.', macroType: 'protein', img: 'https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&q=80&w=200' },
-    { id: 's9', name: 'Kale & Edamame Salad', desc: 'Edamame, kale, sesame seeds, ginger dressing.', macroType: 'fats', img: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&q=80&w=200' },
-  ],
-  '2026-05-05': [
-    { id: 's10', name: 'Almond Butter Smoothie', desc: 'Banana, almond butter, oat milk, cinnamon.', macroType: 'fats', img: 'https://images.unsplash.com/photo-1553530666-ba11a7da3888?auto=format&fit=crop&q=80&w=200' },
-  ],
-  '2026-05-07': [
-    { id: 's11', name: 'Chickpea Curry', desc: 'Coconut chickpea curry with brown rice.', macroType: 'carbs', img: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&q=80&w=200' },
-  ],
-};
-
-function fmtDate(d) {
-  const yr = d.getFullYear();
-  const mo = String(d.getMonth() + 1).padStart(2, '0');
-  const da = String(d.getDate()).padStart(2, '0');
-  return `${yr}-${mo}-${da}`;
-}
+// dominant macro → veggie cutout (same mapping as the garden plants)
+const VEGGIE_BY_TYPE = { protein: 'peas', carbs: 'carrot', fats: 'cucumber', sugars: 'radish' };
 
 function buildWeek(anchor) {
   const start = new Date(anchor);
@@ -52,24 +25,22 @@ function buildWeek(anchor) {
   return days;
 }
 
-const WEEKLY_HYDRATION_PATTERN = [82, 60, 38, 72, 88, 52, 34, 68, 78, 45];
-function weeklyHydration(weekStart) {
-  const epochDays = Math.floor(weekStart.getTime() / (1000 * 60 * 60 * 24));
-  const idx = Math.floor(epochDays / 7);
-  return WEEKLY_HYDRATION_PATTERN[((idx % WEEKLY_HYDRATION_PATTERN.length) + WEEKLY_HYDRATION_PATTERN.length) % WEEKLY_HYDRATION_PATTERN.length];
-}
-
 function plantForType(type, key) {
-  if (type === 'protein') return <TreePlant key={key} isNew={false} />;
   if (type === 'carbs') return <WheatPlant key={key} isNew={false} />;
   if (type === 'fats') return <SucculentPlant key={key} isNew={false} />;
   if (type === 'sugars') return <MushroomPlant key={key} isNew={false} />;
-  return null;
+  return <TreePlant key={key} isNew={false} />;
 }
 
-export default function Calendar({ meals = [] }) {
-  const [anchor, setAnchor] = useState(new Date(2026, 4, 4)); // May 4, 2026
+const MOOD_EMOJI = { happy: '😄', calm: '😌', excited: '🤩', tired: '😴', stressed: '😫', angry: '😤', frustrated: '😣' };
 
+export default function Calendar() {
+  const { user } = useUser();
+  const { mealsByDate, hydration, removeMeal } = useMeals();
+  const [anchor, setAnchor] = useState(() => new Date());
+  const mealsSectionRef = useRef(null);
+
+  const hydrationTargetMl = user.targets.hydrationL * 1000;
   const monthLabel = `${MONTHS[anchor.getMonth()]} ${anchor.getFullYear()}`;
   const week = useMemo(() => buildWeek(anchor), [anchor]);
 
@@ -80,51 +51,55 @@ export default function Calendar({ meals = [] }) {
   }, []);
   const isFutureWeek = week[0] > today;
 
-  const hydraPct = isFutureWeek ? null : weeklyHydration(week[0]);
-  const hydraState = isFutureWeek ? null : (hydraPct < 50 ? 'dry' : hydraPct >= 80 ? 'lush' : 'ok');
+  // Average hydration over the week's elapsed days, measured against the goal
+  const hydraPct = useMemo(() => {
+    if (isFutureWeek) return null;
+    const elapsed = week.filter(d => d <= today);
+    if (elapsed.length === 0) return null;
+    const sum = elapsed.reduce((acc, d) => acc + (hydration[fmtDate(d)] || 0), 0);
+    return Math.round((sum / elapsed.length / hydrationTargetMl) * 100);
+  }, [week, today, hydration, hydrationTargetMl, isFutureWeek]);
+
+  const hydraState = hydraPct == null ? null : (hydraPct < 50 ? 'dry' : hydraPct >= 80 ? 'lush' : 'ok');
   const hydraLabel = hydraState ? {
-    dry: { emoji: '🌵', text: 'Dry week — your garden is thirsty' },
-    ok: { emoji: '🌤', text: 'Steady hydration — garden is holding up' },
-    lush: { emoji: '🌧', text: 'Lush week — garden is thriving' },
+    dry: { Glyph: CactusGlyph, text: 'Dry week — your garden is thirsty' },
+    ok: { Glyph: SunGlyph, text: 'Steady hydration — garden is holding up' },
+    lush: { Glyph: RainGlyph, text: 'Lush week — garden is thriving' },
   }[hydraState] : null;
 
-  // Map logged meals (with loggedAt timestamp) into the same shape as sample meals
-  const userMealsByDate = useMemo(() => {
-    const map = {};
-    meals.forEach((m, i) => {
-      if (!m.loggedAt) return;
-      const key = fmtDate(new Date(m.loggedAt));
-      let macroType = 'protein';
-      if (m.macros) {
-        const { protein = 0, carbs = 0, fats = 0 } = m.macros;
-        if (carbs > protein && carbs > fats) macroType = 'carbs';
-        else if (fats > protein && fats > carbs) macroType = 'fats';
-        else if (m.type === 'snack') macroType = 'sugars';
-      }
-      const meal = {
-        id: `u${i}`,
-        name: m.type ? `${m.type.charAt(0).toUpperCase() + m.type.slice(1)} meal` : 'Logged meal',
-        desc: `${m.macros?.calories ?? 0} kcal · ${m.location || 'Unknown'} · ${m.mood || 'neutral'}`,
-        macroType,
-        img: null,
-      };
-      if (!map[key]) map[key] = [];
-      map[key].push(meal);
-    });
-    return map;
-  }, [meals]);
+  const selectedKey = fmtDate(anchor);
+  const mealsForSelected = mealsByDate[selectedKey] || [];
+  const selectedWaterMl = hydration[selectedKey] || 0;
+  const selectedWaterL = (selectedWaterMl / 1000).toFixed(1);
+  const selectedWaterPct = Math.min(100, Math.round((selectedWaterMl / hydrationTargetMl) * 100));
 
-  const mealsForSelected = useMemo(() => {
-    const key = fmtDate(anchor);
-    return [...(userMealsByDate[key] || []), ...(SAMPLE_MEALS[key] || [])];
-  }, [anchor, userMealsByDate]);
+  const selectedTotals = useMemo(() => {
+    return mealsForSelected.reduce(
+      (acc, m) => {
+        acc.calories += m.macros?.calories ?? 0;
+        acc.protein += m.macros?.protein ?? 0;
+        acc.carbs += m.macros?.carbs ?? 0;
+        acc.fats += m.macros?.fats ?? 0;
+        return acc;
+      },
+      { calories: 0, protein: 0, carbs: 0, fats: 0 }
+    );
+  }, [mealsForSelected]);
 
-  const mealsForWeek = useMemo(() => {
-    return week.flatMap(d => {
-      const key = fmtDate(d);
-      return [...(userMealsByDate[key] || []), ...(SAMPLE_MEALS[key] || [])];
+  const selectedDateLabel = useMemo(() => {
+    return anchor.toLocaleDateString('en-GB', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
     });
-  }, [week, userMealsByDate]);
+  }, [anchor]);
+
+  const handleSelectDay = (d, shouldScroll = false) => {
+    setAnchor(d);
+    if (shouldScroll && mealsSectionRef.current) {
+      mealsSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  };
 
   const goPrev = () => {
     const d = new Date(anchor);
@@ -140,12 +115,12 @@ export default function Calendar({ meals = [] }) {
   const sprouts = (m) => {
     // Render 3 sprout marks; the dominant macro one is colored, others muted
     const colors = {
-      protein: 'var(--color-success)',
-      carbs: 'var(--color-warning)',
+      protein: 'var(--color-protein)',
+      carbs: 'var(--color-carbs)',
       fats: 'var(--color-fats)',
       sugars: 'var(--color-sugars)',
     };
-    const main = colors[m.macroType] || 'var(--color-success)';
+    const main = colors[dominantMacro(m)] || 'var(--color-protein)';
     return (
       <span className="meal-sprouts" aria-hidden="true">
         <Sprout size={16} color="var(--text-secondary)" strokeWidth={1.6} />
@@ -153,6 +128,14 @@ export default function Calendar({ meals = [] }) {
         <Sprout size={16} color="var(--text-secondary)" strokeWidth={1.6} />
       </span>
     );
+  };
+
+  const describeMeal = (m) => {
+    const parts = [`${m.macros?.calories ?? 0} kcal`];
+    if (m.location) parts.push(m.location);
+    if (m.mood) parts.push(`${MOOD_EMOJI[m.mood] || ''} ${m.mood}`);
+    if (m.social) parts.push(m.social === 'alone' ? 'alone' : 'with others');
+    return parts.join(' · ');
   };
 
   return (
@@ -170,15 +153,15 @@ export default function Calendar({ meals = [] }) {
       <div className="cal-week" role="tablist" aria-label="Days of the week">
         {week.map((d, i) => {
           const key = fmtDate(d);
-          const hasMeals = (userMealsByDate[key]?.length || 0) + (SAMPLE_MEALS[key]?.length || 0) > 0;
-          const isActive = fmtDate(d) === fmtDate(anchor);
+          const hasMeals = (mealsByDate[key]?.length || 0) > 0;
+          const isActive = key === fmtDate(anchor);
           return (
             <button
               key={key}
               role="tab"
               aria-selected={isActive}
               className={`cal-day ${isActive ? 'active' : ''}`}
-              onClick={() => setAnchor(d)}
+              onClick={() => handleSelectDay(d)}
             >
               <span className="cal-dow">{DAY_LABELS[i]}</span>
               <span className="cal-date">{d.getDate()}</span>
@@ -197,39 +180,94 @@ export default function Calendar({ meals = [] }) {
         <div className="cal-overview-head">
           <div>
             <h2 className="cal-overview-title">Weekly Garden Overview</h2>
-            <p className="cal-overview-sub">Your planting progress for the current week</p>
+            <p className="cal-overview-sub">Tap any day in your garden bed to view its summary</p>
           </div>
           {hydraState && (
             <span className={`cal-hydra-badge ${hydraState}`} title={`Avg hydration ${hydraPct}%`}>
-              <span className="cal-hydra-emoji" aria-hidden="true">{hydraLabel.emoji}</span>
+              <hydraLabel.Glyph size={14} />
               <span className="cal-hydra-pct">{hydraPct}%</span>
             </span>
           )}
         </div>
 
         <div
-          className={`cal-garden-stage ${hydraState ? `state-${hydraState}` : 'state-future'}`}
-          aria-label={hydraLabel ? `This week's plants — ${hydraLabel.text}` : "Future week — no meals logged yet"}
+          className={`cal-bed ${hydraState ? `bed-${hydraState}` : 'bed-future'}`}
+          aria-label={hydraLabel ? `This week's plants — ${hydraLabel.text}` : 'Future week — no meals logged yet'}
         >
-          <div className="cal-garden-sky" aria-hidden="true" />
-          <div className="cal-garden-grid">
-            {Array.from({ length: 15 }).map((_, idx) => {
-              const meal = mealsForWeek[idx];
+          <div className="cal-bed-grid">
+            {week.map((d, i) => {
+              const key = fmtDate(d);
+              const dayMeals = mealsByDate[key] || [];
+              const isActive = key === fmtDate(anchor);
               return (
-                <div key={idx} className={`cal-cell ${meal ? 'planted' : 'empty'}`}>
-                  {meal
-                    ? <div className="cal-cell-plant">{plantForType(meal.macroType, idx)}</div>
-                    : <span className="cal-empty-soil" />}
-                </div>
+                <button
+                  key={key}
+                  type="button"
+                  className={`cal-bed-col ${isActive ? 'active' : ''}`}
+                  onClick={() => handleSelectDay(d, true)}
+                  aria-label={`${DAY_LABELS[i]} ${d.getDate()}: ${dayMeals.length} meals logged. Tap to view summary.`}
+                >
+                  <div className="cal-bed-plants">
+                    {dayMeals.slice(0, 2).map(m => (
+                      <img
+                        key={m.id}
+                        src={`/veggies/${VEGGIE_BY_TYPE[dominantMacro(m)] || 'peas'}.png`}
+                        alt=""
+                        title={m.name || m.type}
+                      />
+                    ))}
+                    {dayMeals.length > 2 && <span className="cal-bed-more">+{dayMeals.length - 2}</span>}
+                  </div>
+                  <span className={`cal-bed-mound ${dayMeals.length === 0 ? 'empty' : ''} ${isActive ? 'active' : ''}`} aria-hidden="true" />
+                  <span className={`cal-bed-day ${isActive ? 'active' : ''}`}>{DAY_LABELS[i]}</span>
+                </button>
               );
             })}
           </div>
-          {hydraLabel && <p className="cal-garden-caption">{hydraLabel.text}</p>}
-          {isFutureWeek && <p className="cal-garden-caption">No meals logged yet — your garden hasn't grown here.</p>}
+          {hydraLabel && <p className="cal-bed-caption">{hydraLabel.text}</p>}
+          {isFutureWeek && <p className="cal-bed-caption">No meals logged yet — your garden hasn't grown here.</p>}
         </div>
       </section>
 
-      <section className="cal-meals">
+      {/* Selected Day Summary & Meals */}
+      <section className="cal-meals" ref={mealsSectionRef} id="cal-selected-day-section">
+        <div className="cal-day-summary-card">
+          <div className="cal-day-summary-head">
+            <div>
+              <span className="cal-day-summary-tag">Daily Summary</span>
+              <h3 className="cal-day-summary-date">{selectedDateLabel}</h3>
+            </div>
+            <div className="cal-day-summary-count">
+              <Utensils size={14} />
+              <span>{mealsForSelected.length} {mealsForSelected.length === 1 ? 'meal' : 'meals'}</span>
+            </div>
+          </div>
+
+          {mealsForSelected.length > 0 && (
+            <div className="cal-day-stats-grid">
+              <div className="cal-stat-pill">
+                <Flame size={15} className="cal-stat-icon kcal" />
+                <div className="cal-stat-text">
+                  <strong>{selectedTotals.calories}</strong>
+                  <span>/ {user.targets.calories} kcal</span>
+                </div>
+              </div>
+              <div className="cal-stat-pill">
+                <Droplets size={15} className="cal-stat-icon water" />
+                <div className="cal-stat-text">
+                  <strong>{selectedWaterL} L</strong>
+                  <span>water ({selectedWaterPct}%)</span>
+                </div>
+              </div>
+              <div className="cal-macro-chips">
+                <span className="macro-chip protein">P: {selectedTotals.protein}g</span>
+                <span className="macro-chip carbs">C: {selectedTotals.carbs}g</span>
+                <span className="macro-chip fats">F: {selectedTotals.fats}g</span>
+              </div>
+            </div>
+          )}
+        </div>
+
         {mealsForSelected.length === 0 ? (
           <div className="cal-empty-state">
             <p>No meals logged on this day.</p>
@@ -240,19 +278,25 @@ export default function Calendar({ meals = [] }) {
             {mealsForSelected.map(m => (
               <li key={m.id} className="cal-meal">
                 <div className="cal-meal-img">
-                  {m.img ? (
-                    <img src={m.img} alt="" />
-                  ) : (
-                    <div className="cal-meal-placeholder" aria-hidden="true">
-                      {plantForType(m.macroType, m.id)}
-                    </div>
-                  )}
+                  <div className="cal-meal-placeholder" aria-hidden="true">
+                    {plantForType(dominantMacro(m), m.id)}
+                  </div>
                 </div>
                 <div className="cal-meal-text">
-                  <h3 className="cal-meal-name">{m.name}</h3>
-                  <p className="cal-meal-desc">{m.desc}</p>
+                  <h3 className="cal-meal-name">
+                    {m.name || (m.type ? m.type.charAt(0).toUpperCase() + m.type.slice(1) : 'Meal')}
+                  </h3>
+                  <p className="cal-meal-desc">{describeMeal(m)}</p>
                 </div>
                 {sprouts(m)}
+                <button
+                  className="cal-meal-delete"
+                  onClick={() => removeMeal(m.id)}
+                  aria-label={`Delete ${m.name || m.type}`}
+                  title="Remove this meal"
+                >
+                  <Trash2 size={16} />
+                </button>
               </li>
             ))}
           </ul>

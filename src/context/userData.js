@@ -27,31 +27,28 @@ export function calcTargets(p) {
   return { calories, protein, carbs, fats, hydrationL };
 }
 
-export const seedProfiles = {
-  walter: {
-    id: 'walter',
-    name: 'Walter',
-    initials: 'W',
-    bio: 'Trying to slow down and eat better after years of late dinners.',
-    age: 58,
-    gender: 'male',
-    weight: 95,
-    height: 178,
-    activity: 'sedentary',
-    goal: 'lose',
-    accent: '#F59E0B',
-  },
-  ann: {
-    id: 'ann',
-    name: 'Ann',
-    initials: 'A',
-    bio: 'Strength training 5×/week, building lean muscle.',
-    age: 27,
-    gender: 'female',
-    weight: 62,
-    height: 168,
-    activity: 'active',
-    goal: 'muscle',
-    accent: '#10B981',
-  },
+// Veggie avatars — cut-outs in /public/veggies, used as profile pictures.
+export const AVATARS = ['tomato', 'radish', 'carrot', 'peas', 'cucumber', 'leek', 'pepper', 'leaf'];
+
+// Starting values for the onboarding form — sensible defaults the user
+// adjusts with steppers instead of typing into empty fields.
+export const emptyProfile = {
+  name: '',
+  avatar: 'tomato',
+  age: 25,
+  gender: 'female',
+  weight: 62,
+  height: 168,
+  activity: 'moderate',
+  goal: 'maintain',
 };
+
+export function profileComplete(p) {
+  return (
+    p &&
+    p.name?.trim() &&
+    Number(p.age) >= 12 && Number(p.age) <= 100 &&
+    Number(p.weight) >= 30 && Number(p.weight) <= 250 &&
+    Number(p.height) >= 120 && Number(p.height) <= 230
+  );
+}

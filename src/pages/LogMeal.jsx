@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { ChevronRight, ChevronLeft, X, Image as ImageIcon, Sun, Utensils, Moon, Apple, Leaf, ArrowRight, Sprout, MapPin, Sparkles } from 'lucide-react';
+import { ChevronRight, ChevronLeft, X, Image as ImageIcon, Sun, Utensils, Moon, Apple, Leaf, ArrowRight, Sprout, MapPin, Sparkles, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
+import { useMeals, dominantMacro } from '../context/MealsContext';
 import Button from '../components/ui/Button';
 import Chip from '../components/ui/Chip';
 import { TreePlant, MushroomPlant, WheatPlant, SucculentPlant } from '../components/Plants';
@@ -10,7 +11,7 @@ import './LogMeal.css';
 const STEPS = [
   { n: 1, title: 'Choose your seed', desc: 'Pick a meal type and portion size.' },
   { n: 2, title: 'Nutrient profile', desc: 'Scan your plate or set macros manually.' },
-  { n: 3, title: 'Garden atmosphere', desc: 'Add mood, location and social context.' },
+  { n: 3, title: 'Garden atmosphere', desc: 'Add mood, energy, location and company.' },
   { n: 4, title: 'Ready to plant', desc: 'Review and plant in your garden.' },
 ];
 
@@ -30,27 +31,48 @@ const MOODS = [
   { id: 'angry', emoji: '😤', label: 'Frustrated' },
 ];
 
+const ENERGY_OPTIONS = [
+  { id: 'up', label: 'Energized', Icon: TrendingUp, color: 'var(--color-success)' },
+  { id: 'steady', label: 'Steady', Icon: Minus, color: 'var(--color-warning)' },
+  { id: 'down', label: 'Sluggish', Icon: TrendingDown, color: 'var(--color-danger)' },
+];
+
 const LOCATIONS = ['Home', 'Work', 'Restaurant', 'On-the-go'];
 
 const MACRO_FIELDS = [
-  { key: 'calories', label: 'Calories', unit: 'kcal', max: 1200, step: 10, color: '#FBBF24' },
-  { key: 'protein', label: 'Protein', unit: 'g', max: 80, step: 1, color: '#3B82F6' },
-  { key: 'carbs', label: 'Carbs', unit: 'g', max: 120, step: 1, color: '#F59E0B' },
-  { key: 'fats', label: 'Fats', unit: 'g', max: 50, step: 1, color: '#14B8A6' },
+  { key: 'calories', label: 'Calories', unit: 'kcal', max: 1200, step: 10, color: 'var(--color-energy)' },
+  { key: 'protein', label: 'Protein', unit: 'g', max: 80, step: 1, color: 'var(--color-protein)' },
+  { key: 'carbs', label: 'Carbs', unit: 'g', max: 120, step: 1, color: 'var(--color-carbs)' },
+  { key: 'fats', label: 'Fats', unit: 'g', max: 50, step: 1, color: 'var(--color-fats)' },
+  { key: 'sugars', label: 'of which sugars', unit: 'g', max: 60, step: 1, color: 'var(--color-sugars)' },
 ];
 
-export default function LogMeal({ onAddMeal }) {
+// What the (simulated) AI scan finds for a medium portion —
+// scaled by the portion chosen in step 1.
+const SCAN_BASE = { calories: 480, protein: 32, carbs: 58, fats: 18, sugars: 6 };
+const PORTION_FACTOR = { 1: 0.6, 2: 1, 3: 1.4, 4: 1.8 };
+
+function plantFor(macroType) {
+  if (macroType === 'carbs') return <WheatPlant isNew={false} />;
+  if (macroType === 'sugars') return <MushroomPlant isNew={false} />;
+  if (macroType === 'fats') return <SucculentPlant isNew={false} />;
+  return <TreePlant isNew={false} />;
+}
+
+export default function LogMeal() {
   const navigate = useNavigate();
   const { user } = useUser();
+  const { addMeal } = useMeals();
 
   const [step, setStep] = useState(1);
   const [portionVal, setPortionVal] = useState(2);
   const [mealType, setMealType] = useState(null);
-  const [macros, setMacros] = useState({ calories: 480, protein: 32, carbs: 58, fats: 18 });
+  const [macros, setMacros] = useState(SCAN_BASE);
   const [isScanned, setIsScanned] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [mood, setMood] = useState(null);
+  const [energy, setEnergy] = useState(null);
   const [social, setSocial] = useState(null);
   const [location, setLocation] = useState(null);
 
@@ -62,27 +84,33 @@ export default function LogMeal({ onAddMeal }) {
   };
 
   const handleFinish = () => {
-    if (onAddMeal) {
-      onAddMeal({
-        type: mealType,
-        macros: {
-          calories: macros.calories / 10,
-          protein: macros.protein,
-          carbs: macros.carbs,
-          fats: macros.fats,
-        },
-        mood,
-        location,
-        loggedAt: new Date().toISOString(),
-        isNew: true,
-      });
-    }
+    addMeal({
+      type: mealType,
+      portion: portionVal,
+      macros: { ...macros },
+      mood,
+      energy,
+      location,
+      social,
+    });
     navigate('/');
+  };
+
+  const applyScan = () => {
+    const f = PORTION_FACTOR[portionVal] ?? 1;
+    setMacros({
+      calories: Math.round(SCAN_BASE.calories * f / 10) * 10,
+      protein: Math.round(SCAN_BASE.protein * f),
+      carbs: Math.round(SCAN_BASE.carbs * f),
+      fats: Math.round(SCAN_BASE.fats * f),
+      sugars: Math.round(SCAN_BASE.sugars * f),
+    });
+    setIsScanned(true);
   };
 
   const step1Valid = !!mealType;
   const step2Valid = isScanned;
-  const step3Valid = !!mood && !!location && !!social;
+  const step3Valid = !!mood && !!energy && !!location && !!social;
 
   const stepValid = step === 1 ? step1Valid : step === 2 ? step2Valid : step === 3 ? step3Valid : true;
   const stepHint =
@@ -90,12 +118,14 @@ export default function LogMeal({ onAddMeal }) {
     step === 2 ? (isScanned ? null : 'Scan your meal first') :
     step === 3 ? (
       !mood ? 'Pick how you feel' :
+      !energy ? 'How is your energy?' :
       !location ? 'Where did you eat?' :
       !social ? 'Were you alone or with others?' :
       null
     ) : null;
 
   const portionLabels = ['S', 'M', 'L', 'XL'];
+  const macroType = dominantMacro({ macros });
 
   return (
     <div className="log-container animate-fade-in">
@@ -168,6 +198,7 @@ export default function LogMeal({ onAddMeal }) {
                    <span key={l} className={portionVal === i + 1 ? 'active' : ''}>{l}</span>
                  ))}
                </div>
+               <p className="ps-note">The portion scales the estimated macros in the next step.</p>
             </div>
           </section>
         </div>
@@ -193,7 +224,7 @@ export default function LogMeal({ onAddMeal }) {
                     setIsScanning(true);
                     setTimeout(() => {
                       setIsScanning(false);
-                      setIsScanned(true);
+                      applyScan();
                     }, 1500);
                  }}
                  disabled={isScanning}
@@ -201,7 +232,7 @@ export default function LogMeal({ onAddMeal }) {
                  {isScanning ? 'Scanning…' : 'Snap photo'}
                </Button>
 
-               <button className="link-btn" onClick={() => { setIsScanned(true); setIsEditing(true); }}>
+               <button className="link-btn" onClick={() => { applyScan(); setIsEditing(true); }}>
                  Skip and enter manually
                </button>
             </div>
@@ -213,10 +244,10 @@ export default function LogMeal({ onAddMeal }) {
                   </div>
                   <div className="ai-info-flex">
                      <div className="ai-row-top">
-                       <span className="ai-label">AI analysis</span>
-                       <span className="ai-badge">High confidence</span>
+                       <span className="ai-label">{isEditing ? 'Manual entry' : 'AI estimate'}</span>
+                       <span className="ai-badge">{portionLabels[portionVal - 1]} portion</span>
                      </div>
-                     <div className="ai-dish-name">Healthy salmon bowl</div>
+                     <div className="ai-dish-name capitalize">{mealType || 'Your meal'}</div>
                   </div>
                </div>
 
@@ -295,6 +326,24 @@ export default function LogMeal({ onAddMeal }) {
           </section>
 
           <section className="meal-section">
+             <h3 className="meal-section-title">Energy after eating</h3>
+             <div className="segment-ctrl">
+                {ENERGY_OPTIONS.map(({ id, label, Icon, color }) => (
+                  <button
+                    key={id}
+                    className={`segment-btn ${energy === id ? 'active' : ''}`}
+                    onClick={() => setEnergy(id)}
+                    aria-pressed={energy === id}
+                    style={energy === id ? { color } : undefined}
+                  >
+                    <Icon size={15} style={{ verticalAlign: '-2px', marginRight: 6 }} />
+                    {label}
+                  </button>
+                ))}
+             </div>
+          </section>
+
+          <section className="meal-section">
              <h3 className="meal-section-title">Where are you?</h3>
              <div className="chips-row">
                 {LOCATIONS.map(loc => (
@@ -332,12 +381,12 @@ export default function LogMeal({ onAddMeal }) {
         <div className="step-content animate-fade-in">
           <div className="summary-card">
              <div className="sum-content">
-                <h3 className="sum-title">Summary</h3>
+                <h3 className="sum-title capitalize">{mealType || 'Your meal'}</h3>
                 <ul className="sum-list">
-                  <li><Utensils size={16} className="sum-icon"/> <span className="capitalize">{mealType || 'Meal'}</span> · {macros.calories} kcal</li>
+                  <li><Utensils size={16} className="sum-icon"/> <span className="capitalize">{mealType || 'Meal'}</span> · {portionLabels[portionVal - 1]} · {macros.calories} kcal</li>
                   <li>
                     <span style={{ fontSize: '16px', lineHeight: 1 }}>{MOODS.find(m => m.id === mood)?.emoji || '😐'}</span>
-                    <span className="capitalize">{mood || 'Neutral'}</span> · {social === 'alone' ? 'alone' : 'with others'}
+                    <span className="capitalize">{mood || 'Neutral'}</span> · {ENERGY_OPTIONS.find(e => e.id === energy)?.label.toLowerCase()} · {social === 'alone' ? 'alone' : 'with others'}
                   </li>
                   <li><MapPin size={16} className="sum-icon"/> <span className="capitalize">{location || 'Unknown'}</span></li>
                 </ul>
@@ -349,19 +398,11 @@ export default function LogMeal({ onAddMeal }) {
 
           <div className="preview-card">
              <h3 className="sum-title">Visual preview</h3>
-             <span className="sum-subtitle">Your macros will grow into this plant.</span>
+             <span className="sum-subtitle">
+               Dominant macro by calories: <strong className="capitalize">{macroType}</strong> — it grows into this plant.
+             </span>
              <div className="plant-preview-area" style={{ transform: 'scale(1.4)' }}>
-                {(() => {
-                  let pType = 'protein';
-                  if (macros.carbs > macros.protein && macros.carbs > macros.fats) pType = 'carbs';
-                  else if (macros.fats > macros.protein && macros.fats > macros.carbs) pType = 'fats';
-                  else if (mealType === 'snack') pType = 'sugars';
-
-                  if (pType === 'protein') return <TreePlant isNew={false} />;
-                  if (pType === 'carbs') return <WheatPlant isNew={false} />;
-                  if (pType === 'sugars') return <MushroomPlant isNew={false} />;
-                  if (pType === 'fats') return <SucculentPlant isNew={false} />;
-                })()}
+                {plantFor(macroType)}
              </div>
           </div>
         </div>
